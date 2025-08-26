@@ -23,10 +23,10 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#cursos" className="text-foreground hover:text-primary transition-colors">
+            <a href="/courses" className="text-foreground hover:text-primary transition-colors">
               Cursos
             </a>
-            <a href="#planos" className="text-foreground hover:text-primary transition-colors">
+            <a href="/plans" className="text-foreground hover:text-primary transition-colors">
               Planos
             </a>
             <a href="#sobre" className="text-foreground hover:text-primary transition-colors">
@@ -65,14 +65,14 @@ const Header = () => {
           <div className="md:hidden py-4 border-t border-border/50">
             <nav className="flex flex-col gap-4">
               <a 
-                href="#cursos" 
+                href="/courses" 
                 className="text-foreground hover:text-primary transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Cursos
               </a>
               <a 
-                href="#planos" 
+                href="/plans" 
                 className="text-foreground hover:text-primary transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
