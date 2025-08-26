@@ -5,11 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, BookOpen, Users, Settings, BarChart3, TestTube } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+
+// Admin Components
 import AdminCourses from '@/components/admin/AdminCourses';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminUsers from '@/components/admin/AdminUsers';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminSettings from '@/components/admin/AdminSettings';
+
+// Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
 import { CodeQuality } from '@/components/admin/CodeQuality';
 import { Documentation } from '@/components/admin/Documentation';
@@ -152,7 +156,7 @@ const Admin = () => {
         </div>
 
         {/* Main Content */}
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-6 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
@@ -174,69 +178,69 @@ const Admin = () => {
             <AdminUsers />
           </TabsContent>
           
-        <TabsContent value="analytics">
-          <AdminAnalytics />
-        </TabsContent>
+          <TabsContent value="analytics">
+            <AdminAnalytics />
+          </TabsContent>
 
-        <TabsContent value="testing">
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">Quality Assurance & Development Tools</h2>
-              <p className="text-muted-foreground">
-                Comprehensive tools for testing, monitoring, and maintaining development best practices
-              </p>
+          <TabsContent value="testing">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight">Quality Assurance & Development Tools</h2>
+                <p className="text-muted-foreground">
+                  Comprehensive tools for testing, monitoring, and maintaining development best practices
+                </p>
+              </div>
+              
+              <Tabs defaultValue="tests" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="tests">
+                    <TestTube className="w-4 h-4 mr-2" />
+                    Testing
+                  </TabsTrigger>
+                  <TabsTrigger value="quality">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Code Quality
+                  </TabsTrigger>
+                  <TabsTrigger value="docs">
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Documentation
+                  </TabsTrigger>
+                  <TabsTrigger value="feedback">
+                    <Users className="w-4 h-4 mr-2" />
+                    Feedback
+                  </TabsTrigger>
+                  <TabsTrigger value="project">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Project Mgmt
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="tests">
+                  <AdminTesting />
+                </TabsContent>
+
+                <TabsContent value="quality">
+                  <CodeQuality />
+                </TabsContent>
+
+                <TabsContent value="docs">
+                  <Documentation />
+                </TabsContent>
+
+                <TabsContent value="feedback">
+                  <FeedbackSystem />
+                </TabsContent>
+
+                <TabsContent value="project">
+                  <ProjectManagement />
+                </TabsContent>
+              </Tabs>
             </div>
-            
-            <Tabs defaultValue="tests" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="tests">
-                  <TestTube className="w-4 h-4 mr-2" />
-                  Testing
-                </TabsTrigger>
-                <TabsTrigger value="quality">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Code Quality
-                </TabsTrigger>
-                <TabsTrigger value="docs">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Documentation
-                </TabsTrigger>
-                <TabsTrigger value="feedback">
-                  <Users className="w-4 h-4 mr-2" />
-                  Feedback
-                </TabsTrigger>
-                <TabsTrigger value="project">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Project Mgmt
-                </TabsTrigger>
-              </TabsList>
+          </TabsContent>
 
-              <TabsContent value="tests">
-                <AdminTesting />
-              </TabsContent>
-
-              <TabsContent value="quality">
-                <CodeQuality />
-              </TabsContent>
-
-              <TabsContent value="docs">
-                <Documentation />
-              </TabsContent>
-
-              <TabsContent value="feedback">
-                <FeedbackSystem />
-              </TabsContent>
-
-              <TabsContent value="project">
-                <ProjectManagement />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <AdminSettings />
-        </TabsContent>
+          <TabsContent value="settings">
+            <AdminSettings />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
