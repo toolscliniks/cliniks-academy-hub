@@ -17,6 +17,8 @@ const AdminCourses = () => {
   const { toast } = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingCourse, setEditingCourse] = useState<any>(null);
+  const [managingCourse, setManagingCourse] = useState<any>(null);
+  const [isLessonsOpen, setIsLessonsOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -67,6 +69,11 @@ const AdminCourses = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleManageLessons = (course: any) => {
+    setManagingCourse(course);
+    setIsLessonsOpen(true);
   };
 
   const resetForm = () => {
@@ -251,7 +258,7 @@ const AdminCourses = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="cover">Imagem de Capa</Label>
+                <Label htmlFor="cover">Imagem de Capa (Vertical - 708x1494px)</Label>
                 <div className="flex gap-2">
                   <Input
                     id="cover"
@@ -265,11 +272,18 @@ const AdminCourses = () => {
                   </Button>
                 </div>
                 {formData.cover_image_url && (
-                  <img 
-                    src={formData.cover_image_url} 
-                    alt="Preview" 
-                    className="w-32 h-20 object-cover rounded border"
-                  />
+                  <div>
+                    <div className="w-24 aspect-[708/1494]">
+                      <img 
+                        src={formData.cover_image_url} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover rounded border"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Imagem de Capa (Vertical - Resolução sugerida: 708 x 1494 pixels)
+                    </p>
+                  </div>
                 )}
               </div>
               
@@ -284,6 +298,38 @@ const AdminCourses = () => {
             </form>
           </DialogContent>
         </Dialog>
+        
+        {/* Lessons Management Dialog */}
+        <Dialog open={isLessonsOpen} onOpenChange={setIsLessonsOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Gerenciar Aulas - {managingCourse?.title}
+              </DialogTitle>
+              <DialogDescription>
+                Adicione e organize as aulas do curso
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Aulas do Curso</h3>
+                <Button size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nova Aula
+                </Button>
+              </div>
+              
+              <div className="border rounded-lg p-4 bg-muted/50">
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhuma aula cadastrada ainda. 
+                  <br />
+                  Clique em "Nova Aula" para começar a adicionar conteúdo ao curso.
+                </p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Courses List */}
@@ -292,11 +338,13 @@ const AdminCourses = () => {
           <Card key={course.id} className="bg-gradient-card border-border/50">
             <CardHeader>
               {course.cover_image_url && (
-                <img 
-                  src={course.cover_image_url} 
-                  alt={course.title}
-                  className="w-full h-32 object-cover rounded mb-2"
-                />
+                <div className="aspect-[708/1494] w-full mb-2">
+                  <img 
+                    src={course.cover_image_url} 
+                    alt={course.title}
+                    className="w-full h-full object-cover rounded"
+                  />
+                </div>
               )}
               <CardTitle className="text-lg">{course.title}</CardTitle>
               <CardDescription>{course.description}</CardDescription>
@@ -327,7 +375,7 @@ const AdminCourses = () => {
                   <Trash2 className="w-4 h-4 mr-1" />
                   Excluir
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => handleManageLessons(course)}>
                   <Video className="w-4 h-4 mr-1" />
                   Aulas
                 </Button>
