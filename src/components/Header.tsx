@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border/50">
@@ -37,10 +39,10 @@ const Header = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost">
+            <Button variant="ghost" onClick={() => navigate('/auth')}>
               Entrar
             </Button>
-            <Button variant="hero">
+            <Button variant="hero" onClick={() => navigate('/auth')}>
               Começar Agora
             </Button>
           </div>
@@ -91,10 +93,10 @@ const Header = () => {
                 Contato
               </a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
-                <Button variant="ghost" className="justify-start">
+                <Button variant="ghost" className="justify-start" onClick={() => navigate('/auth')}>
                   Entrar
                 </Button>
-                <Button variant="hero" className="justify-start">
+                <Button variant="hero" className="justify-start" onClick={() => navigate('/auth')}>
                   Começar Agora
                 </Button>
               </div>

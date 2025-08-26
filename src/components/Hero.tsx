@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Play, BookOpen, Users, Award } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen bg-hero-gradient overflow-hidden">
       {/* Background Image with Overlay */}
@@ -36,11 +38,11 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-12">
-            <Button variant="hero" size="xl" className="group">
+            <Button variant="hero" size="xl" className="group" onClick={() => navigate('/auth')}>
               <Play className="w-5 h-5 group-hover:animate-pulse" />
               Começar Agora
             </Button>
-            <Button variant="glass" size="xl">
+            <Button variant="glass" size="xl" onClick={() => navigate('/courses')}>
               <BookOpen className="w-5 h-5" />
               Explorar Cursos
             </Button>

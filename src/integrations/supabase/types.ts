@@ -190,36 +190,45 @@ export type Database = {
           created_at: string | null
           description: string | null
           duration_minutes: number | null
+          external_video_id: string | null
+          external_video_platform: string | null
           id: string
           is_free: boolean | null
           module_id: string
           order_index: number
           title: string
           updated_at: string | null
+          video_type: string | null
           video_url: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
+          external_video_id?: string | null
+          external_video_platform?: string | null
           id?: string
           is_free?: boolean | null
           module_id: string
           order_index: number
           title: string
           updated_at?: string | null
+          video_type?: string | null
           video_url?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
+          external_video_id?: string | null
+          external_video_platform?: string | null
           id?: string
           is_free?: boolean | null
           module_id?: string
           order_index?: number
           title?: string
           updated_at?: string | null
+          video_type?: string | null
           video_url?: string | null
         }
         Relationships: [
@@ -314,6 +323,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          role: string | null
           updated_at: string | null
         }
         Insert: {
@@ -323,6 +333,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          role?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -332,6 +343,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          role?: string | null
           updated_at?: string | null
         }
         Relationships: []
