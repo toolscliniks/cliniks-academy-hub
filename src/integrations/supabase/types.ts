@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      certificate_templates: {
+        Row: {
+          background_image_url: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          template_html: string
+          updated_at: string | null
+        }
+        Insert: {
+          background_image_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          template_html: string
+          updated_at?: string | null
+        }
+        Update: {
+          background_image_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          template_html?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_url: string | null
@@ -136,6 +166,59 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      invoices: {
+        Row: {
+          amount: number
+          asaas_payment_id: string | null
+          created_at: string | null
+          currency: string | null
+          due_date: string | null
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          asaas_payment_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          asaas_payment_id?: string | null
+          created_at?: string | null
+          currency?: string | null
+          due_date?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lesson_progress: {
         Row: {
@@ -348,6 +431,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          setting_key: string
+          setting_value: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          setting_key: string
+          setting_value?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string | null
@@ -396,12 +503,129 @@ export type Database = {
           },
         ]
       }
+      user_activity_log: {
+        Row: {
+          activity_description: string | null
+          activity_type: string
+          course_id: string | null
+          created_at: string | null
+          id: string
+          lesson_id: string | null
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          activity_description?: string | null
+          activity_type: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          activity_description?: string | null
+          activity_type?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_activity_log_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_activity_log_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sessions: {
+        Row: {
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          last_activity: string | null
+          session_end: string | null
+          session_start: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          session_end?: string | null
+          session_start?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          last_activity?: string | null
+          session_end?: string | null
+          session_start?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      webhook_configs: {
+        Row: {
+          created_at: string | null
+          event_types: string[]
+          id: string
+          is_active: boolean | null
+          name: string
+          secret_key: string | null
+          updated_at: string | null
+          webhook_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_types: string[]
+          id?: string
+          is_active?: boolean | null
+          name: string
+          secret_key?: string | null
+          updated_at?: string | null
+          webhook_url: string
+        }
+        Update: {
+          created_at?: string | null
+          event_types?: string[]
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          secret_key?: string | null
+          updated_at?: string | null
+          webhook_url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_certificate: {
+        Args: { p_course_id: string; p_user_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

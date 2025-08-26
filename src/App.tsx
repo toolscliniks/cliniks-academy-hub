@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Courses from "./pages/Courses";
 import Plans from "./pages/Plans";
+import Invoices from "./pages/Invoices";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -42,6 +43,11 @@ const App = () => {
               <Route path="/auth" element={<Auth />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/plans" element={<Plans />} />
+              <Route path="/invoices" element={
+                <ProtectedRoute>
+                  <Invoices />
+                </ProtectedRoute>
+              } />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />

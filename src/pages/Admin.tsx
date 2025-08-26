@@ -1,19 +1,62 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, BookOpen, Users, Settings, BarChart3 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import AdminCourses from '@/components/admin/AdminCourses';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminUsers from '@/components/admin/AdminUsers';
+import AdminAnalytics from '@/components/admin/AdminAnalytics';
+import AdminSettings from '@/components/admin/AdminSettings';
 
 const Admin = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('courses');
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Simple admin check - in production you'd verify against user profile
-  if (!user?.email?.includes('admin')) {
+  useEffect(() => {
+    if (user) {
+      checkAdminRole();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const checkAdminRole = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user?.id)
+        .single();
+
+      if (error) throw error;
+      
+      setIsAdmin(data?.role === 'admin');
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      setIsAdmin(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Verificando permissões...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check admin access
+  if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
         <Card className="bg-gradient-card border-border/50 max-w-md">
@@ -39,9 +82,14 @@ const Admin = () => {
               <h1 className="text-2xl font-bold">Painel Administrativo</h1>
               <p className="text-muted-foreground">Gerencie sua plataforma de ensino</p>
             </div>
-            <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
-              Voltar ao Dashboard
-            </Button>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => window.location.href = '/dashboard'}>
+                Dashboard
+              </Button>
+              <Button variant="outline" onClick={() => window.location.href = '/'}>
+                Site
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -99,11 +147,13 @@ const Admin = () => {
         </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
           
           <TabsContent value="courses">
@@ -116,6 +166,14 @@ const Admin = () => {
           
           <TabsContent value="users">
             <AdminUsers />
+          </TabsContent>
+          
+          <TabsContent value="analytics">
+            <AdminAnalytics />
+          </TabsContent>
+          
+          <TabsContent value="settings">
+            <AdminSettings />
           </TabsContent>
         </Tabs>
       </div>
