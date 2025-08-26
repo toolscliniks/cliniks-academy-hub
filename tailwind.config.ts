@@ -27,7 +27,7 @@ export default {
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))',
-					glow: 'hsl(var(--primary-glow))'
+					glow: 'hsl(var(--primary-glow))',
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -62,19 +62,29 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				success: 'hsl(var(--success))',
+				warning: 'hsl(var(--warning))',
+				info: 'hsl(var(--info))',
+				'brand-gray': 'hsl(var(--brand-gray))',
 			},
 			backgroundImage: {
-				'hero-gradient': 'var(--hero-gradient)',
-				'primary-gradient': 'var(--primary-gradient)',
-				'card-gradient': 'var(--card-gradient)'
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-secondary': 'var(--gradient-secondary)',
+				'gradient-success': 'var(--gradient-success)',
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-card': 'var(--gradient-card)'
 			},
 			boxShadow: {
-				'glow': 'var(--glow-shadow)',
-				'elevation': 'var(--elevation-shadow)'
+				'primary': 'var(--shadow-primary)',
+				'elevation': 'var(--shadow-elevation)',
+				'glow': 'var(--shadow-glow)',
+				'accent': 'var(--shadow-accent)',
+				'success': 'var(--shadow-success)'
 			},
 			transitionTimingFunction: {
-				'smooth': 'var(--smooth-transition)'
+				'smooth': 'var(--transition-smooth)',
+				'spring': 'var(--transition-spring)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
