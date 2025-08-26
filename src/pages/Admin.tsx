@@ -3,13 +3,14 @@ import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, BookOpen, Users, Settings, BarChart3 } from 'lucide-react';
+import { Plus, BookOpen, Users, Settings, BarChart3, TestTube } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AdminCourses from '@/components/admin/AdminCourses';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminUsers from '@/components/admin/AdminUsers';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminSettings from '@/components/admin/AdminSettings';
+import { AdminTesting } from '@/components/admin/AdminTesting';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -148,11 +149,12 @@ const Admin = () => {
 
         {/* Main Content */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-6 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="testing">Testes</TabsTrigger>
             <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
           
@@ -168,13 +170,17 @@ const Admin = () => {
             <AdminUsers />
           </TabsContent>
           
-          <TabsContent value="analytics">
-            <AdminAnalytics />
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <AdminSettings />
-          </TabsContent>
+        <TabsContent value="analytics">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="testing">
+          <AdminTesting />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <AdminSettings />
+        </TabsContent>
         </Tabs>
       </div>
     </div>
