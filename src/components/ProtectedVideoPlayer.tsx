@@ -89,7 +89,9 @@ const ProtectedVideoPlayer = ({
         cc_load_policy: 0, // Hide captions by default
         playsinline: 1, // Play inline on mobile
         origin: window.location.origin,
-        enablejsapi: 1
+        enablejsapi: 1,
+        autoplay: 0, // Don't autoplay
+        start: 0 // Start from beginning
       },
       events: {
         onReady: (event: any) => {

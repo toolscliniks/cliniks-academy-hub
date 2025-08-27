@@ -35,8 +35,8 @@ const Index = () => {
             Domine as técnicas mais avançadas em estética profissional com nossos cursos especializados.
           </p>
           
-          {/* Floating Persuasion Bubbles */}
-          <div className="absolute -top-10 left-10 hidden lg:block">
+          {/* Floating Persuasion Bubbles - Posições ajustadas */}
+          <div className="absolute top-16 left-8 hidden lg:block">
             <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float max-w-xs">
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-5 h-5 text-primary" />
@@ -46,7 +46,7 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="absolute -top-5 right-20 hidden lg:block">
+          <div className="absolute top-20 right-8 hidden lg:block">
             <div className="bg-gradient-card border border-accent/20 rounded-2xl p-4 shadow-elegant animate-float max-w-xs" style={{animationDelay: '1.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-accent" />
@@ -56,7 +56,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="absolute top-32 left-1/4 hidden xl:block">
+          <div className="absolute top-80 left-16 hidden xl:block">
             <div className="bg-gradient-card border border-secondary/20 rounded-2xl p-4 shadow-glow animate-float max-w-xs" style={{animationDelay: '2.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-5 h-5 text-secondary" />
