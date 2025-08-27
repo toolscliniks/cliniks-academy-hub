@@ -12,9 +12,144 @@ import {
   Play, 
   CheckCircle, 
   Lock,
-  Award
+  Award,
+  BookOpen,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+interface ModuleLessonsListProps {
+  courseId: string;
+  currentLessonId: string;
+  onLessonSelect: (lessonId: string) => void;
+}
+
+const ModuleLessonsList = ({ courseId, currentLessonId, onLessonSelect }: ModuleLessonsListProps) => {
+  const [modules, setModules] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
+  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchModulesAndLessons();
+  }, [courseId]);
+
+  const fetchModulesAndLessons = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch modules
+      const { data: modulesData, error: modulesError } = await supabase
+        .from('modules')
+        .select('*')
+        .eq('course_id', courseId)
+        .order('order_index');
+
+      if (modulesError) throw modulesError;
+      setModules(modulesData || []);
+
+      // Fetch lessons
+      const { data: lessonsData, error: lessonsError } = await supabase
+        .from('lessons')
+        .select('*')
+        .in('module_id', modulesData?.map(m => m.id) || [])
+        .order('order_index');
+
+      if (lessonsError) throw lessonsError;
+      setLessons(lessonsData || []);
+
+      // Expand module containing current lesson
+      const currentLessonModule = lessonsData?.find(l => l.id === currentLessonId)?.module_id;
+      if (currentLessonModule) {
+        setExpandedModules(new Set([currentLessonModule]));
+      }
+    } catch (error) {
+      console.error('Error fetching modules and lessons:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleModule = (moduleId: string) => {
+    const newExpanded = new Set(expandedModules);
+    if (newExpanded.has(moduleId)) {
+      newExpanded.delete(moduleId);
+    } else {
+      newExpanded.add(moduleId);
+    }
+    setExpandedModules(newExpanded);
+  };
+
+  if (loading) {
+    return <div className="text-center py-4">Carregando...</div>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {modules.map((module, index) => {
+        const moduleLessons = lessons.filter(l => l.module_id === module.id);
+        const isExpanded = expandedModules.has(module.id);
+        
+        return (
+          <Collapsible 
+            key={module.id} 
+            open={isExpanded} 
+            onOpenChange={() => toggleModule(module.id)}
+          >
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-between p-3 h-auto text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">
+                    Módulo {index + 1}: {module.title}
+                  </span>
+                </div>
+                {isExpanded ? 
+                  <ChevronDown className="w-4 h-4" /> : 
+                  <ChevronRight className="w-4 h-4" />
+                }
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pl-6">
+              <div className="space-y-1">
+                {moduleLessons.map((lesson, lessonIndex) => (
+                  <Button
+                    key={lesson.id}
+                    variant={lesson.id === currentLessonId ? "secondary" : "ghost"}
+                    className="w-full justify-start p-2 h-auto text-left"
+                    onClick={() => onLessonSelect(lesson.id)}
+                  >
+                    <div className="flex items-center gap-2 flex-1">
+                      <Play className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-sm">
+                        {lessonIndex + 1}. {lesson.title}
+                      </span>
+                      {lesson.is_free && (
+                        <Badge variant="outline" className="text-xs">
+                          Grátis
+                        </Badge>
+                      )}
+                    </div>
+                    {lesson.duration_minutes && (
+                      <span className="text-xs text-muted-foreground">
+                        {lesson.duration_minutes}min
+                      </span>
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        );
+      })}
+    </div>
+  );
+};
 
 interface Lesson {
   id: string;
@@ -196,11 +331,11 @@ const Lesson = () => {
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate(`/courses/${course.id}`)}
+            onClick={() => navigate('/dashboard')}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao curso
+            Voltar ao Dashboard
           </Button>
           
           <div className="text-sm text-muted-foreground mb-2">
@@ -345,22 +480,14 @@ const Lesson = () => {
 
             <Card className="bg-gradient-card border-border/50">
               <CardHeader>
-                <CardTitle className="text-lg">Sobre o Curso</CardTitle>
+                <CardTitle className="text-lg">Conteúdo do Curso</CardTitle>
               </CardHeader>
               <CardContent>
-                <h4 className="font-semibold mb-1">{course.title}</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Módulo: {module.title}
-                </p>
-                
-                <Button
-                  variant="outline"
-                  onClick={() => navigate(`/courses/${course.id}`)}
-                  className="w-full"
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Ver Curso Completo
-                </Button>
+                <ModuleLessonsList 
+                  courseId={course.id}
+                  currentLessonId={lesson.id}
+                  onLessonSelect={(lessonId) => navigate(`/lesson/${lessonId}`)}
+                />
               </CardContent>
             </Card>
           </div>

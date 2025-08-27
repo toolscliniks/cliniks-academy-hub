@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Loader2 } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward, Loader2, Settings, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ProtectedVideoPlayerProps {
@@ -38,6 +38,10 @@ const ProtectedVideoPlayer = ({
   const [ytPlayer, setYtPlayer] = useState<any>(null);
   const playerRef = useRef<HTMLDivElement>(null);
   const progressInterval = useRef<NodeJS.Timeout>();
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [quality, setQuality] = useState('auto');
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
 
   useEffect(() => {
     if (videoType === 'youtube' && externalVideoId) {
@@ -197,6 +201,27 @@ const ProtectedVideoPlayer = ({
     }
   };
 
+  const changePlaybackRate = (rate: number) => {
+    setPlaybackRate(rate);
+    if (ytPlayer) {
+      ytPlayer.setPlaybackRate(rate);
+    } else {
+      const video = document.querySelector('video');
+      if (video) {
+        video.playbackRate = rate;
+      }
+    }
+    setShowSpeedMenu(false);
+  };
+
+  const changeQuality = (qualityLevel: string) => {
+    setQuality(qualityLevel);
+    if (ytPlayer) {
+      ytPlayer.setPlaybackQuality(qualityLevel);
+    }
+    setShowQualityMenu(false);
+  };
+
   const toggleFullscreen = () => {
     const container = document.querySelector('.video-container');
     if (container) {
@@ -304,14 +329,70 @@ const ProtectedVideoPlayer = ({
                 </span>
               </div>
 
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20 backdrop-blur-sm"
-                onClick={toggleFullscreen}
-              >
-                <Maximize className="w-5 h-5" />
-              </Button>
+              <div className="flex items-center space-x-2">
+                {/* Speed Control */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20 backdrop-blur-sm"
+                    onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                  >
+                    <Gauge className="w-5 h-5" />
+                  </Button>
+                  {showSpeedMenu && (
+                    <div className="absolute bottom-full right-0 mb-2 bg-black/90 backdrop-blur-sm rounded-lg p-2 min-w-[120px]">
+                      {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                        <button
+                          key={rate}
+                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-white/20 rounded ${
+                            playbackRate === rate ? 'text-primary' : 'text-white'
+                          }`}
+                          onClick={() => changePlaybackRate(rate)}
+                        >
+                          {rate}x
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Quality Control (YouTube only) */}
+                <div className="relative">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20 backdrop-blur-sm"
+                    onClick={() => setShowQualityMenu(!showQualityMenu)}
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                  {showQualityMenu && (
+                    <div className="absolute bottom-full right-0 mb-2 bg-black/90 backdrop-blur-sm rounded-lg p-2 min-w-[100px]">
+                      {['auto', 'hd1080', 'hd720', 'large', 'medium', 'small'].map((q) => (
+                        <button
+                          key={q}
+                          className={`block w-full text-left px-3 py-2 text-sm hover:bg-white/20 rounded ${
+                            quality === q ? 'text-primary' : 'text-white'
+                          }`}
+                          onClick={() => changeQuality(q)}
+                        >
+                          {q === 'auto' ? 'Auto' : q.replace('hd', '').replace('large', '480p').replace('medium', '360p').replace('small', '240p')}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/20 backdrop-blur-sm"
+                  onClick={toggleFullscreen}
+                >
+                  <Maximize className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -454,14 +535,43 @@ const ProtectedVideoPlayer = ({
               </span>
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20 backdrop-blur-sm"
-              onClick={toggleFullscreen}
-            >
-              <Maximize className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              {/* Speed Control */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-white/20 backdrop-blur-sm"
+                  onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                >
+                  <Gauge className="w-5 h-5" />
+                </Button>
+                {showSpeedMenu && (
+                  <div className="absolute bottom-full right-0 mb-2 bg-black/90 backdrop-blur-sm rounded-lg p-2 min-w-[120px]">
+                    {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                      <button
+                        key={rate}
+                        className={`block w-full text-left px-3 py-2 text-sm hover:bg-white/20 rounded ${
+                          playbackRate === rate ? 'text-primary' : 'text-white'
+                        }`}
+                        onClick={() => changePlaybackRate(rate)}
+                      >
+                        {rate}x
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white/20 backdrop-blur-sm"
+                onClick={toggleFullscreen}
+              >
+                <Maximize className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

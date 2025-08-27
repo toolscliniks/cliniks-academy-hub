@@ -300,11 +300,11 @@ const CourseDetail = () => {
           {/* Navigation */}
           <Button
             variant="ghost"
-            onClick={() => navigate('/courses')}
+            onClick={() => navigate('/dashboard')}
             className="absolute top-8 left-6 text-white hover:bg-white/20"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar aos cursos
+            Voltar ao Dashboard
           </Button>
 
           {/* Course Hero Content */}
