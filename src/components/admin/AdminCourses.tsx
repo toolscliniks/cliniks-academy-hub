@@ -321,6 +321,30 @@ const AdminCourses = () => {
     }
   };
 
+  const handleToggleFeatured = async (courseId: string, featured: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('courses')
+        .update({ is_featured: featured })
+        .eq('id', courseId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: featured ? "Curso adicionado aos destaques!" : "Curso removido dos destaques!",
+        description: featured ? "O curso agora aparecerá na página inicial." : "O curso não aparecerá mais na página inicial."
+      });
+      
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -854,6 +878,13 @@ const AdminCourses = () => {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Dificuldade:</span>
                   <Badge variant="secondary">{course.difficulty_level}</Badge>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Em Destaque:</span>
+                  <Switch
+                    checked={course.is_featured || false}
+                    onCheckedChange={(checked) => handleToggleFeatured(course.id, checked)}
+                  />
                 </div>
                 {course.price && (
                   <div className="flex items-center justify-between text-sm">

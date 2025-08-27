@@ -2,16 +2,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, BookOpen, Users, Award, Clock, Star, ArrowRight, Sparkles } from "lucide-react";
+import { Play, BookOpen, Users, Award, Clock, Star, ArrowRight, Sparkles, Zap, Heart, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useCourses, Course } from "@/hooks/useCourses";
+import { useFeaturedCourses } from "@/hooks/useFeaturedCourses";
+import { Course } from "@/hooks/useCourses";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const ModernHomepage = () => {
   const navigate = useNavigate();
-  const { courses, loading } = useCourses();
+  const { courses, loading } = useFeaturedCourses();
   const { user } = useAuth();
   const { toast } = useToast();
   const [purchasingCourseId, setPurchasingCourseId] = useState<string | null>(null);
@@ -64,83 +65,74 @@ const ModernHomepage = () => {
   };
 
   const CourseCard = ({ course }: { course: Course }) => (
-    <Card className="group bg-gradient-card border-border/50 hover:border-primary/20 transition-all duration-500 hover:shadow-glow hover:scale-105 overflow-hidden">
+    <Card className="group bg-gradient-card border-border/50 hover:border-primary/20 transition-all duration-500 hover:shadow-glow hover:scale-105 overflow-hidden relative">
+      {/* Glowing effect overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      
       <div className="relative">
         {course.cover_image_url ? (
-          <div className="aspect-[16/9] overflow-hidden">
+          <div className="aspect-[3/4] overflow-hidden relative">
             <img 
               src={course.cover_image_url} 
               alt={course.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
+            {/* Aesthetic clinic overlay effect */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
         ) : (
-          <div className="aspect-[16/9] bg-gradient-secondary flex items-center justify-center">
-            <BookOpen className="w-12 h-12 text-white/80" />
+          <div className="aspect-[3/4] bg-gradient-secondary flex items-center justify-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(127,0,250,0.1),transparent_70%)]" />
+            <BookOpen className="w-16 h-16 text-white/80 relative z-10" />
           </div>
         )}
         
-        {/* Difficulty Badge */}
-        <Badge className={`absolute top-3 left-3 ${getDifficultyColor(course.difficulty_level)} border font-medium`}>
-          {course.difficulty_level}
+        {/* Premium badge */}
+        <Badge className="absolute top-3 left-3 bg-primary/90 text-white border-primary/50 font-medium backdrop-blur-sm">
+          <Sparkles className="w-3 h-3 mr-1" />
+          Premium
         </Badge>
       </div>
 
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg group-hover:text-primary transition-colors duration-300 line-clamp-2">
+      <CardHeader className="pb-3 relative">
+        <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300 line-clamp-2 mb-2">
           {course.title}
         </CardTitle>
-        <CardDescription className="line-clamp-2 text-muted-foreground">
+        <CardDescription className="line-clamp-3 text-muted-foreground leading-relaxed">
           {course.description}
         </CardDescription>
       </CardHeader>
       
       <CardContent className="pt-0">
-        <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>{course.duration_hours}h</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Users className="w-4 h-4" />
-            <span>1.2k alunos</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-warning text-warning" />
-            <span>4.8</span>
-          </div>
-        </div>
-
         {course.instructor_name && (
-          <p className="text-sm text-muted-foreground mb-4">
-            por <span className="text-foreground font-medium">{course.instructor_name}</span>
-          </p>
+          <div className="flex items-center gap-2 mb-4 text-sm">
+            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold text-xs">
+                {course.instructor_name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <span className="text-muted-foreground">
+              com <span className="text-foreground font-medium">{course.instructor_name}</span>
+            </span>
+          </div>
         )}
 
-        <div className="flex items-center justify-between">
-          {course.price ? (
-            <div className="text-2xl font-bold text-primary">
-              {course.currency === 'BRL' ? 'R$' : course.currency === 'USD' ? '$' : '€'} 
-              {parseFloat(course.price.toString()).toFixed(2)}
-            </div>
-          ) : (
-            <div className="text-2xl font-bold text-success">Gratuito</div>
-          )}
-          
-          <Button 
-            onClick={() => handlePurchaseCourse(course)}
-            disabled={purchasingCourseId === course.id}
-            className="bg-gradient-primary hover:shadow-primary group/btn"
-          >
-            {purchasingCourseId === course.id ? (
-              "Processando..."
-            ) : (
-              <>
-                <Play className="w-4 h-4 group-hover/btn:animate-pulse" />
-                Comprar Curso
-              </>
-            )}
-          </Button>
+        {/* Call to action */}
+        <div className="space-y-3">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground mb-2">
+              Transforme sua carreira profissional
+            </p>
+            <Button 
+              onClick={() => navigate('/auth')}
+              className="w-full bg-gradient-primary hover:shadow-glow group/btn relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
+              <Heart className="w-4 h-4 mr-2 group-hover/btn:animate-pulse" />
+              Começar Jornada
+              <ArrowRight className="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -225,27 +217,33 @@ const ModernHomepage = () => {
       </section>
 
       {/* Featured Courses Section */}
-      <section className="py-20 bg-background/50">
-        <div className="container mx-auto px-4">
+      <section className="py-20 bg-gradient-subtle relative overflow-hidden">
+        {/* Floating aesthetic elements */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-20 right-20 w-40 h-40 bg-accent/5 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 left-1/4 w-20 h-20 bg-success/10 rounded-full blur-2xl animate-pulse delay-500" />
+        
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center mb-16">
-            <Badge className="bg-accent/10 text-accent border-accent/20 px-4 py-2 text-sm font-medium mb-4">
-              <Award className="w-4 h-4 mr-2" />
-              Cursos em Destaque
+            <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-2 text-sm font-medium mb-4">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Cursos Especializados em Estética
             </Badge>
             <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Escolha sua 
-              <span className="bg-gradient-primary bg-clip-text text-transparent"> Especialização</span>
+              Domine as Técnicas Mais 
+              <span className="bg-gradient-primary bg-clip-text text-transparent"> Avançadas</span>
             </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Cursos desenvolvidos por especialistas renomados, com certificações reconhecidas pelo mercado e suporte completo durante toda sua jornada.
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Transforme vidas através da beleza. Nossos cursos são desenvolvidos por especialistas renomados, 
+              com certificações reconhecidas pelo mercado e metodologia comprovada.
             </p>
           </div>
           
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                 <Card key={i} className="animate-pulse bg-muted/20">
-                  <div className="aspect-[16/9] bg-muted/30" />
+                  <div className="aspect-[3/4] bg-muted/30" />
                   <CardHeader>
                     <div className="h-4 bg-muted/30 rounded mb-2" />
                     <div className="h-3 bg-muted/20 rounded" />
@@ -253,27 +251,79 @@ const ModernHomepage = () => {
                 </Card>
               ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.slice(0, 6).map((course) => (
+          ) : courses.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {courses.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
-          )}
-          
-          {courses.length > 6 && (
-            <div className="text-center mt-12">
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                <BookOpen className="w-12 h-12 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Cursos em Breve</h3>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                Estamos preparando cursos incríveis para você. Cadastre-se para ser notificado quando estiverem disponíveis.
+              </p>
               <Button 
                 variant="premium" 
                 size="lg" 
-                onClick={() => navigate('/courses')}
+                onClick={() => navigate('/auth')}
                 className="group"
               >
-                Ver Todos os Cursos
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <Heart className="w-5 h-5 mr-2 group-hover:animate-pulse" />
+                Cadastrar-se Gratuitamente
+                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-20 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Por que escolher a <span className="bg-gradient-primary bg-clip-text text-transparent">Cliniks Academy</span>?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Mais que conhecimento, oferecemos uma experiência completa de transformação profissional.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="group bg-gradient-card hover:shadow-glow transition-all duration-500 text-center p-6">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Shield className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Certificação Reconhecida</h3>
+              <p className="text-muted-foreground">
+                Certificados válidos em todo território nacional, reconhecidos pelos principais órgãos do setor.
+              </p>
+            </Card>
+            
+            <Card className="group bg-gradient-card hover:shadow-glow transition-all duration-500 text-center p-6">
+              <div className="w-16 h-16 bg-gradient-secondary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Metodologia Exclusiva</h3>
+              <p className="text-muted-foreground">
+                Técnicas avançadas e inovadoras, desenvolvidas por profissionais com mais de 15 anos de experiência.
+              </p>
+            </Card>
+            
+            <Card className="group bg-gradient-card hover:shadow-glow transition-all duration-500 text-center p-6">
+              <div className="w-16 h-16 bg-gradient-success rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Suporte Completo</h3>
+              <p className="text-muted-foreground">
+                Acompanhamento personalizado durante todo seu aprendizado, com mentoria e suporte técnico.
+              </p>
+            </Card>
+          </div>
         </div>
       </section>
 

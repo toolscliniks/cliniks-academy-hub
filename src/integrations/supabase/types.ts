@@ -136,6 +136,7 @@ export type Database = {
           duration_hours: number | null
           id: string
           instructor_name: string | null
+          is_featured: boolean | null
           is_published: boolean | null
           price: number | null
           title: string
@@ -151,6 +152,7 @@ export type Database = {
           duration_hours?: number | null
           id?: string
           instructor_name?: string | null
+          is_featured?: boolean | null
           is_published?: boolean | null
           price?: number | null
           title: string
@@ -166,6 +168,7 @@ export type Database = {
           duration_hours?: number | null
           id?: string
           instructor_name?: string | null
+          is_featured?: boolean | null
           is_published?: boolean | null
           price?: number | null
           title?: string
