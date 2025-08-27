@@ -3,7 +3,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, BookOpen, Users, Settings, BarChart3, TestTube } from 'lucide-react';
+import { Plus, BookOpen, Users, Settings, BarChart3, TestTube, CreditCard, UserPlus, Bell, Monitor, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 import AdminUsers from '@/components/admin/AdminUsers';
@@ -15,6 +15,7 @@ import UserMonitoring from '@/components/admin/UserMonitoring';
 import ManualEnrollment from '@/components/admin/ManualEnrollment';
 import SubscriptionManagement from '@/components/admin/SubscriptionManagement';
 import NotificationManagement from '@/components/admin/NotificationManagement';
+import PaymentSettings from '@/components/admin/PaymentSettings';
 
 // Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
@@ -156,13 +157,14 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-10 mb-8">
+          <TabsList className="grid w-full grid-cols-11 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="monitoring">Monitor</TabsTrigger>
             <TabsTrigger value="enrollment">Matrículas</TabsTrigger>
             <TabsTrigger value="subscriptions">Assinaturas</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
             <TabsTrigger value="notifications">Notificações</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="testing">Testes</TabsTrigger>
@@ -191,6 +193,10 @@ const Admin = () => {
           
           <TabsContent value="subscriptions">
             <SubscriptionManagement />
+          </TabsContent>
+          
+          <TabsContent value="payments">
+            <PaymentSettings />
           </TabsContent>
           
           <TabsContent value="notifications">

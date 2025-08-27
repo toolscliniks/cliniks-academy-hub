@@ -8,7 +8,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Edit, Trash2, Check, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Check, X, BookOpen } from 'lucide-react';
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+}
 
 interface Plan {
   id: string;
@@ -18,14 +24,19 @@ interface Plan {
   price_yearly: number;
   features: string[];
   is_active: boolean;
+  courses?: Course[];
 }
 
 const AdminPlans = () => {
   const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [isManagingCourses, setIsManagingCourses] = useState(false);
+  const [selectedPlanForCourses, setSelectedPlanForCourses] = useState<Plan | null>(null);
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -37,17 +48,33 @@ const AdminPlans = () => {
 
   useEffect(() => {
     fetchPlans();
+    fetchCourses();
   }, []);
 
   const fetchPlans = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: plansData, error } = await supabase
         .from('plans')
-        .select('*')
+        .select(`
+          *,
+          plan_courses (
+            courses (
+              id,
+              title,
+              description
+            )
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPlans(data || []);
+      
+      const plansWithCourses = plansData?.map(plan => ({
+        ...plan,
+        courses: plan.plan_courses?.map((pc: any) => pc.courses) || []
+      })) || [];
+      
+      setPlans(plansWithCourses);
     } catch (error: any) {
       toast({
         title: "Erro ao carregar planos",
@@ -56,6 +83,21 @@ const AdminPlans = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('id, title, description')
+        .eq('is_published', true)
+        .order('title');
+
+      if (error) throw error;
+      setCourses(data || []);
+    } catch (error: any) {
+      console.error('Error fetching courses:', error);
     }
   };
 
@@ -180,6 +222,54 @@ const AdminPlans = () => {
     }
   };
 
+  const handleManageCourses = (plan: Plan) => {
+    setSelectedPlanForCourses(plan);
+    setSelectedCourses(plan.courses?.map(c => c.id) || []);
+    setIsManagingCourses(true);
+  };
+
+  const handleSaveCourses = async () => {
+    if (!selectedPlanForCourses) return;
+
+    try {
+      // Remove existing plan-course relationships
+      await supabase
+        .from('plan_courses')
+        .delete()
+        .eq('plan_id', selectedPlanForCourses.id);
+
+      // Add new relationships
+      if (selectedCourses.length > 0) {
+        const planCourses = selectedCourses.map(courseId => ({
+          plan_id: selectedPlanForCourses.id,
+          course_id: courseId
+        }));
+
+        const { error } = await supabase
+          .from('plan_courses')
+          .insert(planCourses);
+
+        if (error) throw error;
+      }
+
+      toast({
+        title: "Cursos atualizados!",
+        description: "Os cursos do plano foram atualizados com sucesso."
+      });
+
+      setIsManagingCourses(false);
+      setSelectedPlanForCourses(null);
+      setSelectedCourses([]);
+      fetchPlans();
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-8">Carregando planos...</div>;
   }
@@ -189,7 +279,7 @@ const AdminPlans = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold">Gerenciar Planos</h2>
-          <p className="text-muted-foreground">Crie e gerencie os planos de assinatura</p>
+          <p className="text-muted-foreground">Crie e gerencie os planos de assinatura e associe cursos</p>
         </div>
         
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -345,11 +435,34 @@ const AdminPlans = () => {
                   </ul>
                 </div>
               )}
+
+              {plan.courses && plan.courses.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Cursos Inclusos:</h4>
+                  <ul className="space-y-1">
+                    {plan.courses.slice(0, 2).map((course, index) => (
+                      <li key={index} className="flex items-center text-sm">
+                        <BookOpen className="w-3 h-3 text-primary mr-2 flex-shrink-0" />
+                        {course.title}
+                      </li>
+                    ))}
+                    {plan.courses.length > 2 && (
+                      <li className="text-sm text-muted-foreground">
+                        +{plan.courses.length - 2} cursos adicionais
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
               
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" size="sm" onClick={() => handleEdit(plan)}>
                   <Edit className="w-4 h-4 mr-1" />
                   Editar
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleManageCourses(plan)}>
+                  <BookOpen className="w-4 h-4 mr-1" />
+                  Cursos
                 </Button>
                 <Button 
                   variant="outline" 
@@ -387,6 +500,60 @@ const AdminPlans = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Manage Courses Dialog */}
+      <Dialog open={isManagingCourses} onOpenChange={setIsManagingCourses}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Gerenciar Cursos - {selectedPlanForCourses?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Selecione os cursos que farão parte deste plano
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {courses.map((course) => (
+              <div key={course.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                <input
+                  type="checkbox"
+                  id={`course-${course.id}`}
+                  checked={selectedCourses.includes(course.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedCourses([...selectedCourses, course.id]);
+                    } else {
+                      setSelectedCourses(selectedCourses.filter(id => id !== course.id));
+                    }
+                  }}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor={`course-${course.id}`} className="flex-1 cursor-pointer">
+                  <div className="font-medium">{course.title}</div>
+                  <div className="text-sm text-muted-foreground">{course.description}</div>
+                </label>
+              </div>
+            ))}
+            
+            {courses.length === 0 && (
+              <div className="text-center py-6 text-muted-foreground">
+                <BookOpen className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Nenhum curso publicado encontrado</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setIsManagingCourses(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveCourses}>
+              Salvar Cursos ({selectedCourses.length} selecionados)
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
