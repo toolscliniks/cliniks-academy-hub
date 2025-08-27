@@ -11,7 +11,7 @@ import AdminCourses from '@/components/admin/AdminCourses';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminSettings from '@/components/admin/AdminSettings';
-import UserMonitoring from '@/components/admin/UserMonitoring';
+import { UserMonitoring } from '@/components/admin/UserMonitoring';
 import ManualEnrollment from '@/components/admin/ManualEnrollment';
 import SubscriptionManagement from '@/components/admin/SubscriptionManagement';
 import NotificationManagement from '@/components/admin/NotificationManagement';

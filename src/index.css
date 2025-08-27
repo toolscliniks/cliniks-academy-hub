@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* Cliniks Academy Brand Colors - Phase 1 */
+/* Cliniks Academy Brand Colors - Updated Palette */
     --background: 0 0% 8%;           /* #141414 - Very dark background */
     --foreground: 0 0% 95%;          /* #f2f2f2 - Light text */
     
@@ -16,18 +16,18 @@
     --popover: 0 0% 8%;              /* #141414 - Dark popover */
     --popover-foreground: 0 0% 95%;  /* #f2f2f2 - Light popover text */
     
-    /* Cliniks Academy Primary Colors */
-    --primary: 264 100% 50%;         /* #7f00fa - Primary purple */
+    /* Cliniks Academy Primary Colors - Brand Palette */
+    --primary: 264 100% 50%;         /* #7f00fa - Primary purple from palette */
     --primary-foreground: 0 0% 98%;  /* #fafafa - Light primary text */
     --primary-glow: 264 100% 60%;    /* Lighter purple for glow effects */
     
-    --secondary: 0 0% 26%;           /* #424242 - Brand gray */
+    --secondary: 0 0% 26%;           /* #424242 - Brand gray from palette */
     --secondary-foreground: 0 0% 95%; /* #f2f2f2 - Light secondary text */
     
     --muted: 0 0% 15%;               /* #262626 - Muted background */
     --muted-foreground: 0 0% 65%;    /* #A6A6A6 - Muted text */
     
-    --accent: 320 100% 50%;          /* #fb0082 - Pink accent */
+    --accent: 322 100% 44%;          /* #fb0082 - Pink accent from palette */
     --accent-foreground: 0 0% 98%;   /* #fafafa - Light accent text */
     
     --destructive: 0 84% 60%;        /* #e74c3c - Red destructive */
@@ -39,11 +39,11 @@
     
     --radius: 0.5rem;
     
-    /* Custom Cliniks Academy Variables */
-    --success: 174 100% 47%;         /* #0ff0b3 - Success/brand green */
-    --warning: 320 100% 50%;         /* #fb0082 - Warning pink */
-    --info: 264 100% 50%;            /* #7f00fa - Info purple */
-    --brand-gray: 0 0% 26%;          /* #424242 - Brand gray */
+    /* Custom Cliniks Academy Variables - Brand Palette */
+    --success: 174 100% 47%;         /* #0ff0b3 - Success/brand green from palette */
+    --warning: 322 100% 44%;         /* #fb0082 - Warning pink from palette */
+    --info: 264 100% 50%;            /* #7f00fa - Info purple from palette */
+    --brand-gray: 0 0% 26%;          /* #424242 - Brand gray from palette */
     
     /* Gradients using brand colors */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));

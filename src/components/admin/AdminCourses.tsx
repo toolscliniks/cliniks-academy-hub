@@ -191,17 +191,30 @@ const AdminCourses = () => {
         throw new Error('URL do YouTube inválida');
       }
 
-      // Fetch YouTube video info
-      const youtubeInfo = await fetchYouTubeInfo(lessonFormData.youtubeUrl);
-      
+      let title = lessonFormData.title;
+      let duration = 10; // Default 10 minutes
+
+      try {
+        // Try to fetch YouTube video info
+        const youtubeInfo = await fetchYouTubeInfo(lessonFormData.youtubeUrl);
+        title = lessonFormData.title || youtubeInfo.title;
+        duration = Math.ceil(youtubeInfo.duration / 60); // Convert seconds to minutes
+      } catch (youtubeError) {
+        console.warn('Failed to fetch YouTube info, using defaults:', youtubeError);
+        // If YouTube API fails, use manual input or defaults
+        if (!title) {
+          title = `Aula ${lessons.filter(l => l.module_id === selectedModuleId).length + 1}`;
+        }
+      }
+
       // Add lesson with YouTube data
       await addLesson(selectedModuleId, {
-        title: lessonFormData.title || youtubeInfo.title,
+        title,
         description: lessonFormData.description,
         video_type: 'youtube',
         external_video_id: videoId,
         external_video_platform: 'youtube',
-        duration_minutes: Math.ceil(youtubeInfo.duration / 60), // Convert seconds to minutes
+        duration_minutes: duration,
         is_free: lessonFormData.is_free
       });
 
