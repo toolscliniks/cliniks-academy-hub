@@ -7,8 +7,7 @@ import { Plus, BookOpen, Users, Settings, BarChart3, TestTube, CreditCard, UserP
 import { supabase } from '@/integrations/supabase/client';
 
 import AdminCourses from '@/components/admin/AdminCourses';
-import LessonManagement from '@/components/admin/LessonManagement';
-import ModuleManagement from '@/components/admin/ModuleManagement';
+import LessonModuleManagement from '@/components/admin/LessonModuleManagement';
 import ImageManagement from '@/components/admin/ImageManagement';
 import AdminUsers from '@/components/admin/AdminUsers';
 import AdminPlans from '@/components/admin/AdminPlans';
@@ -160,10 +159,9 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-13 mb-8">
+          <TabsList className="grid w-full grid-cols-12 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
-            <TabsTrigger value="lessons">Aulas</TabsTrigger>
-            <TabsTrigger value="modules">Módulos</TabsTrigger>
+            <TabsTrigger value="lessons">Aulas & Módulos</TabsTrigger>
             <TabsTrigger value="images">Imagens</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
@@ -182,11 +180,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="lessons">
-            <LessonManagement />
-          </TabsContent>
-          
-          <TabsContent value="modules">
-            <ModuleManagement />
+            <LessonModuleManagement />
           </TabsContent>
           
           <TabsContent value="images">
