@@ -182,31 +182,7 @@ const Index = () => {
         )}
       </main>
       
-      {/* Bottom CTA Section */}
-      <section className="bg-gradient-primary py-16 relative overflow-hidden">
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-            Pronto para Transformar sua Carreira?
-          </h2>
-          <p className="text-primary-foreground/90 mb-8 max-w-2xl mx-auto">
-            Junte-se a milhares de profissionais que já descobriram o segredo do sucesso na estética
-          </p>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            className="hover:shadow-glow transition-all duration-300"
-            onClick={() => navigate('/auth')}
-          >
-            <Award className="w-5 h-5 mr-2" />
-            Começar Minha Jornada
-          </Button>
-        </div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-10 left-10 w-8 h-8 bg-primary-foreground/10 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-10 right-20 w-6 h-6 bg-primary-foreground/10 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 right-10 w-4 h-4 bg-primary-foreground/10 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
-      </section>
+      
     </div>
   );
 };
