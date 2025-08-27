@@ -57,5 +57,8 @@ verify_jwt = true
 [functions.change-plan]
 verify_jwt = true
 
-[functions.renew-subscription]
-verify_jwt = true
+[functions.send-notification]
+verify_jwt = false
+
+[functions.n8n-webhook-handler]
+verify_jwt = false

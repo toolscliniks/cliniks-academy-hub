@@ -14,6 +14,7 @@ import AdminSettings from '@/components/admin/AdminSettings';
 import UserMonitoring from '@/components/admin/UserMonitoring';
 import ManualEnrollment from '@/components/admin/ManualEnrollment';
 import SubscriptionManagement from '@/components/admin/SubscriptionManagement';
+import NotificationManagement from '@/components/admin/NotificationManagement';
 
 // Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
@@ -155,13 +156,14 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-9 mb-8">
+          <TabsList className="grid w-full grid-cols-10 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="monitoring">Monitor</TabsTrigger>
             <TabsTrigger value="enrollment">Matrículas</TabsTrigger>
             <TabsTrigger value="subscriptions">Assinaturas</TabsTrigger>
+            <TabsTrigger value="notifications">Notificações</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="testing">Testes</TabsTrigger>
             <TabsTrigger value="settings">Config</TabsTrigger>
@@ -189,6 +191,10 @@ const Admin = () => {
           
           <TabsContent value="subscriptions">
             <SubscriptionManagement />
+          </TabsContent>
+          
+          <TabsContent value="notifications">
+            <NotificationManagement />
           </TabsContent>
           
           <TabsContent value="analytics">

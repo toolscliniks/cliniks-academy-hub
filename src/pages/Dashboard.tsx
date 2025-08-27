@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionCard from '@/components/SubscriptionCard';
+import NotificationCenter from '@/components/NotificationCenter';
 import { Plus, BookOpen, Star, Clock, Users, Trophy, TrendingUp } from 'lucide-react';
 import { useCourses } from '@/hooks/useCourses';
 import { supabase } from '@/integrations/supabase/client';
@@ -175,6 +176,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <NotificationCenter />
               <Button
                 variant="ghost"
                 size="sm"

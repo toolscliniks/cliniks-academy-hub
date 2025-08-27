@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Courses from "./pages/Courses";
 import Plans from "./pages/Plans";
 import Invoices from "./pages/Invoices";
+import NotificationsPage from "./pages/Notifications";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import Lesson from "./pages/Lesson";
@@ -50,6 +51,11 @@ const App = () => {
               <Route path="/invoices" element={
                 <ProtectedRoute>
                   <Invoices />
+                </ProtectedRoute>
+              } />
+              <Route path="/notifications" element={
+                <ProtectedRoute>
+                  <NotificationsPage />
                 </ProtectedRoute>
               } />
               <Route path="/dashboard" element={
