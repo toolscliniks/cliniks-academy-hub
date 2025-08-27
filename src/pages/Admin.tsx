@@ -106,8 +106,8 @@ const Admin = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Total Cursos</p>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-sm text-muted-foreground">Em breve</p>
+                  <p className="text-2xl font-bold">--</p>
                 </div>
                 <BookOpen className="h-8 w-8 text-primary" />
               </div>
@@ -118,8 +118,8 @@ const Admin = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Usuários Ativos</p>
-                  <p className="text-2xl font-bold">1,234</p>
+                  <p className="text-sm text-muted-foreground">Em breve</p>
+                  <p className="text-2xl font-bold">--</p>
                 </div>
                 <Users className="h-8 w-8 text-primary" />
               </div>
@@ -130,8 +130,8 @@ const Admin = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Matrículas</p>
-                  <p className="text-2xl font-bold">856</p>
+                  <p className="text-sm text-muted-foreground">Em breve</p>
+                  <p className="text-2xl font-bold">--</p>
                 </div>
                 <BarChart3 className="h-8 w-8 text-primary" />
               </div>
@@ -142,8 +142,8 @@ const Admin = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Taxa de Conclusão</p>
-                  <p className="text-2xl font-bold">78%</p>
+                  <p className="text-sm text-muted-foreground">Em breve</p>
+                  <p className="text-2xl font-bold">--</p>
                 </div>
                 <Settings className="h-8 w-8 text-primary" />
               </div>

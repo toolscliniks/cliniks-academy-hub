@@ -11,6 +11,8 @@ export interface Course {
   difficulty_level: string;
   category: string | null;
   is_published: boolean;
+  price: number | null;
+  currency: string | null;
   created_at: string;
   updated_at: string;
 }

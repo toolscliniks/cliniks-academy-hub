@@ -30,7 +30,9 @@ const AdminCourses = () => {
     duration_hours: 0,
     difficulty_level: 'Iniciante',
     category: '',
-    cover_image_url: ''
+    cover_image_url: '',
+    price: '',
+    currency: 'BRL'
   });
   
   const [lessonFormData, setLessonFormData] = useState({
@@ -63,10 +65,15 @@ const AdminCourses = () => {
     e.preventDefault();
     
     try {
+      const submitData = {
+        ...formData,
+        price: formData.price ? parseFloat(formData.price) : null
+      };
+      
       if (editingCourse) {
         const { error } = await supabase
           .from('courses')
-          .update(formData)
+          .update(submitData)
           .eq('id', editingCourse.id);
           
         if (error) throw error;
@@ -78,7 +85,7 @@ const AdminCourses = () => {
       } else {
         const { error } = await supabase
           .from('courses')
-          .insert([{ ...formData, is_published: true }]);
+          .insert([{ ...submitData, is_published: true }]);
           
         if (error) throw error;
         
@@ -253,7 +260,9 @@ const AdminCourses = () => {
       duration_hours: 0,
       difficulty_level: 'Iniciante',
       category: '',
-      cover_image_url: ''
+      cover_image_url: '',
+      price: '',
+      currency: 'BRL'
     });
   };
 
@@ -266,7 +275,9 @@ const AdminCourses = () => {
       duration_hours: course.duration_hours,
       difficulty_level: course.difficulty_level,
       category: course.category || '',
-      cover_image_url: course.cover_image_url || ''
+      cover_image_url: course.cover_image_url || '',
+      price: course.price?.toString() || '',
+      currency: course.currency || 'BRL'
     });
     setIsCreateOpen(true);
   };
@@ -423,6 +434,40 @@ const AdminCourses = () => {
                     value={formData.category}
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price">Preço (R$)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    placeholder="299.00"
+                    value={formData.price}
+                    onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Deixe vazio para venda apenas via planos
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Moeda</Label>
+                  <Select 
+                    value={formData.currency} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, currency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BRL">Real (BRL)</SelectItem>
+                      <SelectItem value="USD">Dólar (USD)</SelectItem>
+                      <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               
@@ -797,6 +842,15 @@ const AdminCourses = () => {
                   <span className="text-muted-foreground">Dificuldade:</span>
                   <Badge variant="secondary">{course.difficulty_level}</Badge>
                 </div>
+                {course.price && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Preço:</span>
+                    <span className="font-semibold text-primary">
+                      {course.currency === 'BRL' ? 'R$' : course.currency === 'USD' ? '$' : '€'} 
+                      {parseFloat(course.price.toString()).toFixed(2)}
+                    </span>
+                  </div>
+                )}
               </div>
               
               <div className="flex gap-2">

@@ -14,6 +14,7 @@ import Plans from "./pages/Plans";
 import Invoices from "./pages/Invoices";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import Lesson from "./pages/Lesson";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => {
                   <Admin />
                 </ProtectedRoute>
               } />
+              <Route path="/lesson/:lessonId" element={<Lesson />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

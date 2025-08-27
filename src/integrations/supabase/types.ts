@@ -130,12 +130,14 @@ export type Database = {
           category: string | null
           cover_image_url: string | null
           created_at: string | null
+          currency: string | null
           description: string | null
           difficulty_level: string | null
           duration_hours: number | null
           id: string
           instructor_name: string | null
           is_published: boolean | null
+          price: number | null
           title: string
           updated_at: string | null
         }
@@ -143,12 +145,14 @@ export type Database = {
           category?: string | null
           cover_image_url?: string | null
           created_at?: string | null
+          currency?: string | null
           description?: string | null
           difficulty_level?: string | null
           duration_hours?: number | null
           id?: string
           instructor_name?: string | null
           is_published?: boolean | null
+          price?: number | null
           title: string
           updated_at?: string | null
         }
@@ -156,12 +160,14 @@ export type Database = {
           category?: string | null
           cover_image_url?: string | null
           created_at?: string | null
+          currency?: string | null
           description?: string | null
           difficulty_level?: string | null
           duration_hours?: number | null
           id?: string
           instructor_name?: string | null
           is_published?: boolean | null
+          price?: number | null
           title?: string
           updated_at?: string | null
         }
