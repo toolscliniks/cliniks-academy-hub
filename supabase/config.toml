@@ -50,3 +50,12 @@ verify_jwt = true
 
 [functions.youtube-video-info]
 verify_jwt = true
+
+[functions.cancel-subscription]
+verify_jwt = true
+
+[functions.change-plan]
+verify_jwt = true
+
+[functions.renew-subscription]
+verify_jwt = true

@@ -210,10 +210,12 @@ export type Database = {
         Row: {
           amount: number
           asaas_payment_id: string | null
+          change_reason: string | null
           created_at: string | null
           currency: string | null
           due_date: string | null
           id: string
+          invoice_type: string | null
           paid_at: string | null
           payment_method: string | null
           status: string
@@ -224,10 +226,12 @@ export type Database = {
         Insert: {
           amount: number
           asaas_payment_id?: string | null
+          change_reason?: string | null
           created_at?: string | null
           currency?: string | null
           due_date?: string | null
           id?: string
+          invoice_type?: string | null
           paid_at?: string | null
           payment_method?: string | null
           status?: string
@@ -238,10 +242,12 @@ export type Database = {
         Update: {
           amount?: number
           asaas_payment_id?: string | null
+          change_reason?: string | null
           created_at?: string | null
           currency?: string | null
           due_date?: string | null
           id?: string
+          invoice_type?: string | null
           paid_at?: string | null
           payment_method?: string | null
           status?: string
@@ -521,6 +527,42 @@ export type Database = {
           setting_key?: string
           setting_value?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      subscription_changes: {
+        Row: {
+          change_type: string
+          created_at: string | null
+          effective_date: string | null
+          id: string
+          metadata: Json | null
+          new_plan_id: string | null
+          old_plan_id: string | null
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          change_type: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          metadata?: Json | null
+          new_plan_id?: string | null
+          old_plan_id?: string | null
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          change_type?: string
+          created_at?: string | null
+          effective_date?: string | null
+          id?: string
+          metadata?: Json | null
+          new_plan_id?: string | null
+          old_plan_id?: string | null
+          subscription_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

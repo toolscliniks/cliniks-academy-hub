@@ -124,11 +124,44 @@ const Invoices = () => {
   };
 
   const handleRetryPayment = async (invoiceId: string) => {
-    toast({
-      title: "Tentativa de pagamento",
-      description: "Redirecionando para o portal de pagamento..."
-    });
-    // Implement retry payment logic here
+    setLoading(true);
+    try {
+      // Get invoice details
+      const { data: invoice, error: invoiceError } = await supabase
+        .from('invoices')
+        .select('*')
+        .eq('id', invoiceId)
+        .single();
+
+      if (invoiceError) throw invoiceError;
+
+      // Create new payment session
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-payment-asaas', {
+        body: {
+          amount: invoice.amount,
+          description: `Retentativa de pagamento - Fatura ${invoiceId.slice(-8)}`,
+          invoice_id: invoiceId
+        }
+      });
+
+      if (paymentError) throw paymentError;
+
+      if (paymentData.paymentUrl) {
+        window.open(paymentData.paymentUrl, '_blank');
+        toast({
+          title: "Redirecionamento realizado",
+          description: "Você foi redirecionado para o portal de pagamento"
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Erro ao processar pagamento",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) {
