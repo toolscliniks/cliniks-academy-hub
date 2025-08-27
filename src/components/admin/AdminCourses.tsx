@@ -124,19 +124,42 @@ const AdminCourses = () => {
 
   const handleAddLesson = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedModuleId) return;
+    console.log('handleAddLesson called', { 
+      selectedModuleId, 
+      managingCourse: managingCourse?.id, 
+      lessonFormData,
+      fetchYouTubeInfo: typeof fetchYouTubeInfo 
+    });
+    
+    if (!selectedModuleId) {
+      console.log('No selectedModuleId');
+      return;
+    }
+
+    if (!managingCourse?.id) {
+      console.log('No managingCourse.id');
+      toast({
+        title: "Erro",
+        description: "Curso não selecionado para gerenciar aulas",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       setFetchingYouTube(true);
       
       // Extract video ID from YouTube URL
       const videoId = extractYouTubeVideoId(lessonFormData.youtubeUrl);
+      console.log('Extracted video ID:', videoId);
       if (!videoId) {
         throw new Error('URL do YouTube inválida');
       }
 
       // Fetch YouTube video info
+      console.log('Calling fetchYouTubeInfo...');
       const youtubeInfo = await fetchYouTubeInfo(lessonFormData.youtubeUrl);
+      console.log('YouTube info received:', youtubeInfo);
       
       // Add lesson with YouTube data
       await addLesson(selectedModuleId, {
@@ -503,6 +526,7 @@ const AdminCourses = () => {
                                 <Button 
                                   size="sm" 
                                   onClick={() => {
+                                    console.log('Opening lesson dialog for module:', module.id, 'managingCourse:', managingCourse?.id);
                                     setSelectedModuleId(module.id);
                                     resetLessonForm();
                                   }}
