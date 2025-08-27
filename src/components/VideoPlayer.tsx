@@ -54,6 +54,7 @@ const VideoPlayer = ({
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-presentation"
         />
         {title && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
