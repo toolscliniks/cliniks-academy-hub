@@ -36,12 +36,8 @@ const Courses = () => {
   });
 
   const handleEnrollCourse = (courseId: string) => {
-    // TODO: Implement enrollment logic
-    toast({
-      title: "Curso selecionado!",
-      description: "Redirecionando para os detalhes do curso..."
-    });
-    navigate(`/course/${courseId}`);
+    // Navigate to course detail page
+    navigate(`/courses/${courseId}`);
   };
 
   const clearFilters = () => {

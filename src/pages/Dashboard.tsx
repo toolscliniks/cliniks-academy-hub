@@ -227,7 +227,7 @@ const Dashboard = () => {
                   <div 
                     key={lesson.id} 
                     className="flex-shrink-0 w-[380px] cursor-pointer transition-all duration-300 hover:scale-105"
-                    onClick={() => navigate(`/course/${lesson.course.id}/lesson/${lesson.id}`)}
+                    onClick={() => navigate(`/lesson/${lesson.id}`)}
                   >
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-white/20">
                       {/* Horizontal thumbnail */}
@@ -295,7 +295,7 @@ const Dashboard = () => {
                 <div 
                   key={course.id}
                   className="cursor-pointer transition-all duration-300 hover:scale-105 group"
-                  onClick={() => navigate(`/course/${course.id}`)}
+                  onClick={() => navigate(`/courses/${course.id}`)}
                 >
                   <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-700/50">
                     <div className="relative aspect-[708/1494] bg-gradient-to-br from-gray-700 to-gray-900">
