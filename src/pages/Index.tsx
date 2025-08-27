@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCourses } from "@/hooks/useCourses";
 import { BookOpen, Clock, Star, Users, Play, Sparkles, Award, TrendingUp } from "lucide-react";
 import { Loader2 } from "lucide-react";
+import ParticleEffect from '@/components/ParticleEffect';
 
 const Index = () => {
   const { courses, loading } = useCourses();
@@ -14,6 +15,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero relative overflow-hidden">
+      {/* Particle Background Effect */}
+      <ParticleEffect particleCount={30} className="opacity-30" />
+      
       {/* Floating aesthetic elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-20 w-4 h-4 bg-primary/20 rounded-full animate-float"></div>
@@ -37,9 +41,9 @@ const Index = () => {
 
           </p>
           
-          {/* Floating Persuasion Bubbles */}
+          {/* Floating Persuasion Bubbles with enhanced animations */}
           <div className="absolute -top-10 left-10 hidden lg:block">
-            <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float max-w-xs">
+            <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float animate-pulse-glow max-w-xs">
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-5 h-5 text-primary" />
                 <span className="text-sm font-semibold text-primary">+800 clínicas</span>
@@ -49,7 +53,7 @@ const Index = () => {
           </div>
           
           <div className="absolute -top-5 right-20 hidden lg:block">
-            <div className="bg-gradient-card border border-accent/20 rounded-2xl p-4 shadow-elegant animate-float max-w-xs" style={{animationDelay: '1.5s'}}>
+            <div className="bg-gradient-card border border-accent/20 rounded-2xl p-4 shadow-elegant animate-drift max-w-xs" style={{animationDelay: '1.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-accent" />
                 <span className="text-sm font-semibold text-accent">Método certificado!</span>
@@ -59,12 +63,22 @@ const Index = () => {
           </div>
 
           <div className="absolute top-32 left-1/4 hidden xl:block">
-            <div className="bg-gradient-card border border-secondary/20 rounded-2xl p-4 shadow-glow animate-float max-w-xs" style={{animationDelay: '2.5s'}}>
+            <div className="bg-gradient-card border border-secondary/20 rounded-2xl p-4 shadow-glow animate-float animate-shimmer max-w-xs" style={{animationDelay: '2.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-5 h-5 text-secondary" />
                 <span className="text-sm font-semibold text-secondary">Cliniks</span>
               </div>
               <p className="text-xs text-muted-foreground">Clinicas que crescem são CLINIKS!</p>
+            </div>
+          </div>
+
+          <div className="absolute top-20 right-1/4 hidden xl:block">
+            <div className="bg-gradient-card border border-yellow-500/20 rounded-2xl p-4 shadow-elegant animate-drift max-w-xs" style={{animationDelay: '3s'}}>
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-5 h-5 text-yellow-500" />
+                <span className="text-sm font-semibold text-yellow-500">+1000 Alunos</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Transformaram seus negócios</p>
             </div>
           </div>
         </div>

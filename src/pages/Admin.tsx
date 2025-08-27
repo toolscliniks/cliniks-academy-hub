@@ -18,6 +18,7 @@ import ManualEnrollment from '@/components/admin/ManualEnrollment';
 import SubscriptionManagement from '@/components/admin/SubscriptionManagement';
 import NotificationManagement from '@/components/admin/NotificationManagement';
 import PaymentSettings from '@/components/admin/PaymentSettings';
+import DashboardSettings from '@/components/admin/DashboardSettings';
 
 // Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
@@ -159,20 +160,21 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-12 mb-8">
-            <TabsTrigger value="courses">Cursos</TabsTrigger>
-            <TabsTrigger value="lessons">Aulas & Módulos</TabsTrigger>
-            <TabsTrigger value="images">Imagens</TabsTrigger>
-            <TabsTrigger value="plans">Planos</TabsTrigger>
-            <TabsTrigger value="users">Usuários</TabsTrigger>
-            <TabsTrigger value="monitoring">Monitor</TabsTrigger>
-            <TabsTrigger value="enrollment">Matrículas</TabsTrigger>
-            <TabsTrigger value="subscriptions">Assinaturas</TabsTrigger>
-            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
-            <TabsTrigger value="notifications">Notificações</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="testing">Testes</TabsTrigger>
-            <TabsTrigger value="settings">Config</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 mb-8 h-auto">
+            <TabsTrigger value="courses" className="text-xs lg:text-sm">Cursos</TabsTrigger>
+            <TabsTrigger value="lessons" className="text-xs lg:text-sm hidden lg:flex">Aulas</TabsTrigger>
+            <TabsTrigger value="images" className="text-xs lg:text-sm hidden lg:flex">Imagens</TabsTrigger>
+            <TabsTrigger value="plans" className="text-xs lg:text-sm">Planos</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs lg:text-sm">Usuários</TabsTrigger>
+            <TabsTrigger value="dashboard-settings" className="text-xs lg:text-sm">Dashboard</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs lg:text-sm hidden lg:flex">Analytics</TabsTrigger>
+            <TabsTrigger value="monitoring" className="text-xs lg:text-sm hidden lg:flex">Monitor</TabsTrigger>
+            <TabsTrigger value="enrollment" className="text-xs lg:text-sm hidden lg:flex">Matrículas</TabsTrigger>
+            <TabsTrigger value="subscriptions" className="text-xs lg:text-sm hidden lg:flex">Assinaturas</TabsTrigger>
+            <TabsTrigger value="payments" className="text-xs lg:text-sm hidden lg:flex">Pagamentos</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs lg:text-sm hidden lg:flex">Notificações</TabsTrigger>
+            <TabsTrigger value="testing" className="text-xs lg:text-sm hidden lg:flex">Testes</TabsTrigger>
+            <TabsTrigger value="settings" className="text-xs lg:text-sm">Config</TabsTrigger>
           </TabsList>
           
           <TabsContent value="courses">
@@ -217,6 +219,10 @@ const Admin = () => {
           
           <TabsContent value="analytics">
             <AdminAnalytics />
+          </TabsContent>
+
+          <TabsContent value="dashboard-settings">
+            <DashboardSettings />
           </TabsContent>
 
           <TabsContent value="testing">

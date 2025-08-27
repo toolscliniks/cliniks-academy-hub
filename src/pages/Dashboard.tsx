@@ -82,7 +82,14 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
-      const { data: lessonsData, error } = await supabase
+      // First try to get custom featured courses from settings
+      const { data: settingsData } = await supabase
+        .from('site_settings')
+        .select('setting_value')
+        .eq('setting_key', 'homepage_featured_courses')
+        .single();
+
+      let lessonsQuery = supabase
         .from('lessons')
         .select(`
           id,
@@ -103,8 +110,21 @@ const Dashboard = () => {
             )
           )
         `)
-        .eq('modules.courses.is_published', true)
-        .limit(20);
+        .eq('modules.courses.is_published', true);
+
+      // If there are featured courses settings, filter by them
+      if (settingsData?.setting_value) {
+        const featuredCourses = settingsData.setting_value as any[];
+        const featuredCourseIds = featuredCourses
+          .filter(fc => fc.is_featured_on_homepage)
+          .map(fc => fc.course_id);
+        
+        if (featuredCourseIds.length > 0) {
+          lessonsQuery = lessonsQuery.in('modules.courses.id', featuredCourseIds);
+        }
+      }
+
+      const { data: lessonsData, error } = await lessonsQuery.limit(20);
 
       if (error) throw error;
 
