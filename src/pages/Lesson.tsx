@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import VideoPlayer from '@/components/VideoPlayer';
+import ProtectedVideoPlayer from '@/components/ProtectedVideoPlayer';
 import { Badge } from '@/components/ui/badge';
 import { 
   ArrowLeft, 
@@ -216,7 +216,7 @@ const Lesson = () => {
               <CardContent className="p-0">
                 {hasAccess ? (
                   <div className="aspect-video">
-                    <VideoPlayer
+                    <ProtectedVideoPlayer
                       videoUrl={lesson.video_url}
                       videoType={lesson.video_type as 'youtube' | 'upload' | 'vimeo'}
                       externalVideoId={lesson.external_video_id}
