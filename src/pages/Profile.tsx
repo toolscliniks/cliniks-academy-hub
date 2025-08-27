@@ -72,7 +72,7 @@ const Profile = () => {
           bio: profile.bio,
           avatar_url: profile.avatar_url,
           email: user?.email
-        });
+        }, { onConflict: 'id' });
 
       if (error) throw error;
 

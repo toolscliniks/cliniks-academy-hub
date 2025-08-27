@@ -140,6 +140,7 @@ export type Database = {
           is_published: boolean | null
           price: number | null
           title: string
+          trailer_video_url: string | null
           updated_at: string | null
         }
         Insert: {
@@ -156,6 +157,7 @@ export type Database = {
           is_published?: boolean | null
           price?: number | null
           title: string
+          trailer_video_url?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -172,6 +174,7 @@ export type Database = {
           is_published?: boolean | null
           price?: number | null
           title?: string
+          trailer_video_url?: string | null
           updated_at?: string | null
         }
         Relationships: []

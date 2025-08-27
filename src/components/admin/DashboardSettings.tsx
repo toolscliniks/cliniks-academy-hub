@@ -209,6 +209,49 @@ const DashboardSettings = () => {
     saveFeaturedCourses(updatedFeatured);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Erro",
+        description: "A imagem deve ter no máximo 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `carousel_${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('course-covers')
+        .upload(`carousel/${fileName}`, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-covers')
+        .getPublicUrl(`carousel/${fileName}`);
+
+      setCarouselFormData(prev => ({ ...prev, image_url: publicUrl }));
+      
+      toast({
+        title: "Imagem enviada!",
+        description: "A imagem do carrossel foi carregada com sucesso."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
   const editCarouselItem = (item: CarouselItem) => {
     setEditingCarouselItem(item);
     setCarouselFormData({
@@ -296,14 +339,31 @@ const DashboardSettings = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="image_url">URL da Imagem</Label>
+                    <Label htmlFor="image_url">URL da Imagem (1600x428px)</Label>
                     <Input
                       id="image_url"
                       value={carouselFormData.image_url}
                       onChange={(e) => setCarouselFormData(prev => ({...prev, image_url: e.target.value}))}
-                      placeholder="https://..."
+                      placeholder="https://... (recomendado: 1600x428px)"
                       required
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Dimensão recomendada: 1600x428 pixels para melhor exibição
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="image_upload">Ou faça upload de uma imagem</Label>
+                    <Input
+                      id="image_upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Formatos aceitos: JPG, PNG, WebP (máx. 5MB)
+                    </p>
                   </div>
 
                   <div className="flex items-center space-x-2">

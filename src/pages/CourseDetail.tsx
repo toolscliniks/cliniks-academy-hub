@@ -31,6 +31,7 @@ interface Course {
   difficulty_level: string;
   category: string;
   cover_image_url: string;
+  trailer_video_url?: string;
   price: number | null;
   currency: string;
   is_featured: boolean;
@@ -53,6 +54,8 @@ interface Lesson {
   order_index: number;
   video_url: string | null;
   video_type: string;
+  external_video_id?: string;
+  external_video_platform?: string;
 }
 
 interface Enrollment {
@@ -240,6 +243,12 @@ const CourseDetail = () => {
     setExpandedModules(newExpanded);
   };
 
+  const extractYouTubeVideoId = (url: string): string | null => {
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
   const getTotalDuration = () => {
     return lessons.reduce((total, lesson) => total + lesson.duration_minutes, 0);
   };
@@ -409,36 +418,52 @@ const CourseDetail = () => {
               </div>
             </div>
 
-            {/* Course Trailer/Preview */}
-            <div className="lg:col-span-2">
-              <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl">
-                {course.cover_image_url ? (
-                  <img 
-                    src={course.cover_image_url} 
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-card flex items-center justify-center">
-                    <Video className="w-16 h-16 text-muted-foreground" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <Button
-                    size="lg"
-                    className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
-                    onClick={() => {
-                      const firstFreeLesson = lessons.find(l => l.is_free);
-                      if (firstFreeLesson) {
-                        watchLesson(firstFreeLesson.id, true);
-                      }
-                    }}
-                  >
-                    <Play className="w-8 h-8 ml-1" />
-                  </Button>
+      {/* Course Trailer/Preview */}
+      <div className="lg:col-span-2">
+        <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl">
+          {course.trailer_video_url ? (
+            <div className="relative w-full h-full">
+              <iframe
+                src={`https://www.youtube.com/embed/${extractYouTubeVideoId(course.trailer_video_url)}?autoplay=1&mute=1&loop=1&playlist=${extractYouTubeVideoId(course.trailer_video_url)}&controls=0&showinfo=0&rel=0&modestbranding=1`}
+                className="w-full h-full object-cover"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+              />
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center pointer-events-none">
+                <div className="bg-black/40 rounded-full p-4 backdrop-blur-sm">
+                  <Play className="w-12 h-12 text-white" />
                 </div>
               </div>
             </div>
+          ) : course.cover_image_url ? (
+            <>
+              <img 
+                src={course.cover_image_url} 
+                alt={course.title}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <Button
+                  size="lg"
+                  className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                  onClick={() => {
+                    const firstFreeLesson = lessons.find(l => l.is_free);
+                    if (firstFreeLesson) {
+                      watchLesson(firstFreeLesson.id, true);
+                    }
+                  }}
+                >
+                  <Play className="w-8 h-8 ml-1" />
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-card flex items-center justify-center">
+              <Video className="w-16 h-16 text-muted-foreground" />
+            </div>
+          )}
+        </div>
+      </div>
           </div>
         </div>
       </div>
@@ -520,8 +545,14 @@ const CourseDetail = () => {
                               onClick={() => watchLesson(lesson.id, lesson.is_free)}
                             >
                               {/* Lesson Thumbnail */}
-                              <div className="w-16 h-10 rounded overflow-hidden bg-muted/20 flex-shrink-0">
-                                {lesson.video_url ? (
+                              <div className="w-16 h-10 rounded overflow-hidden bg-muted/20 flex-shrink-0 relative">
+                                {lesson.video_type === 'youtube' && lesson.external_video_id ? (
+                                  <img
+                                    src={`https://img.youtube.com/vi/${lesson.external_video_id}/mqdefault.jpg`}
+                                    alt={lesson.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : lesson.video_url ? (
                                   <img
                                     src={lesson.video_url}
                                     alt={lesson.title}

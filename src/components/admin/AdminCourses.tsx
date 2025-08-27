@@ -31,6 +31,7 @@ const AdminCourses = () => {
     difficulty_level: 'Iniciante',
     category: '',
     cover_image_url: '',
+    trailer_video_url: '',
     price: '',
     currency: 'BRL'
   });
@@ -274,6 +275,7 @@ const AdminCourses = () => {
       difficulty_level: 'Iniciante',
       category: '',
       cover_image_url: '',
+      trailer_video_url: '',
       price: '',
       currency: 'BRL'
     });
@@ -289,6 +291,7 @@ const AdminCourses = () => {
       difficulty_level: course.difficulty_level,
       category: course.category || '',
       cover_image_url: course.cover_image_url || '',
+      trailer_video_url: course.trailer_video_url || '',
       price: course.price?.toString() || '',
       currency: course.currency || 'BRL'
     });
@@ -472,6 +475,19 @@ const AdminCourses = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
                   />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="trailer_video">Vídeo Trailer (YouTube)</Label>
+                <Input
+                  id="trailer_video"
+                  value={formData.trailer_video_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, trailer_video_url: e.target.value }))}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+                <p className="text-xs text-muted-foreground">
+                  URL do YouTube para vídeo de propaganda que ficará rodando em loop na página do curso (estilo Netflix)
+                </p>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -718,23 +734,36 @@ const AdminCourses = () => {
                             <div className="space-y-2">
                               {moduleLessons.map((lesson, index) => (
                                 <div key={lesson.id} className="flex items-center justify-between p-3 border rounded bg-background">
-                                  <div className="flex items-center gap-3">
-                                    <span className="w-6 h-6 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center justify-center">
-                                      {index + 1}
-                                    </span>
-                                    <div>
-                                      <p className="font-medium text-sm">{lesson.title}</p>
-                                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <Youtube className="w-3 h-3 text-red-500" />
-                                        <span>{lesson.duration_minutes} min</span>
-                                        {lesson.is_free && (
-                                          <Badge variant="secondary" className="text-xs px-1 py-0">
-                                            Gratuita
-                                          </Badge>
-                                        )}
-                                      </div>
-                                    </div>
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-8 rounded overflow-hidden bg-muted/20 flex-shrink-0">
+                                {lesson.video_type === 'youtube' && lesson.external_video_id ? (
+                                  <img
+                                    src={`https://img.youtube.com/vi/${lesson.external_video_id}/mqdefault.jpg`}
+                                    alt={lesson.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                                    <Video className="w-3 h-3 text-muted-foreground" />
                                   </div>
+                                )}
+                              </div>
+                              <span className="w-6 h-6 bg-primary/10 text-primary text-xs font-semibold rounded-full flex items-center justify-center">
+                                {index + 1}
+                              </span>
+                              <div>
+                                <p className="font-medium text-sm">{lesson.title}</p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Youtube className="w-3 h-3 text-red-500" />
+                                  <span>{lesson.duration_minutes} min</span>
+                                  {lesson.is_free && (
+                                    <Badge variant="secondary" className="text-xs px-1 py-0">
+                                      Gratuita
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
                                   
                                   <Button variant="ghost" size="sm">
                                     <ExternalLink className="w-3 h-3" />

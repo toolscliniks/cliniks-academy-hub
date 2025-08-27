@@ -76,6 +76,9 @@ const ProtectedVideoPlayer = ({
 
   const initYouTubePlayer = () => {
     if (!playerRef.current || ytPlayer) return;
+    
+    // Clear any existing content
+    playerRef.current.innerHTML = '';
 
     const player = new window.YT.Player(playerRef.current, {
       height: '100%',
