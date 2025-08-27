@@ -32,37 +32,39 @@ const Index = () => {
             Cliniks Academy
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto mb-8 leading-relaxed">
+            Aprenda as técnicas de venda que vão alavancar o faturamento da sua clínica.
             Domine as técnicas mais avançadas em estética profissional com nossos cursos especializados.
+
           </p>
           
           {/* Floating Persuasion Bubbles */}
-          <div className="absolute -top-50 left-10 hidden lg:block">
+          <div className="absolute -top-10 left-10 hidden lg:block">
             <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float max-w-xs">
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">+5.000 Alunos</span>
+                <span className="text-sm font-semibold text-primary">+800 clínicas</span>
               </div>
-              <p className="text-xs text-muted-foreground">Transformaram suas carreiras</p>
+              <p className="text-xs text-muted-foreground">Alavancaram suas carreiras</p>
             </div>
           </div>
           
-          <div className="absolute -top-40 right-20 hidden lg:block">
+          <div className="absolute -top-5 right-20 hidden lg:block">
             <div className="bg-gradient-card border border-accent/20 rounded-2xl p-4 shadow-elegant animate-float max-w-xs" style={{animationDelay: '1.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-accent" />
-                <span className="text-sm font-semibold text-accent">ROI de 300%</span>
+                <span className="text-sm font-semibold text-accent">Método certificado!</span>
               </div>
-              <p className="text-xs text-muted-foreground">Em média após conclusão</p>
+              <p className="text-xs text-muted-foreground">Método validado pelos orgãos competentes</p>
             </div>
           </div>
 
-          <div className="absolute top-60 left-1/4 hidden xl:block">
+          <div className="absolute top-32 left-1/4 hidden xl:block">
             <div className="bg-gradient-card border border-secondary/20 rounded-2xl p-4 shadow-glow animate-float max-w-xs" style={{animationDelay: '2.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-5 h-5 text-secondary" />
-                <span className="text-sm font-semibold text-secondary">Certificação</span>
+                <span className="text-sm font-semibold text-secondary">Cliniks</span>
               </div>
-              <p className="text-xs text-muted-foreground">Reconhecida nacionalmente</p>
+              <p className="text-xs text-muted-foreground">Clinicas que crescem são CLINIKS!</p>
             </div>
           </div>
         </div>
@@ -71,9 +73,9 @@ const Index = () => {
       {/* Courses Section */}
       <main className="container mx-auto px-4 pb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Nossos Cursos Especializados</h2>
+          <h2 className="text-3xl font-bold mb-4 text-foreground">Cursos dentro da Cliniks Academy</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Escolha o curso ideal para sua jornada profissional na estética
+            Faça o cadastro e seja +1 clinikers!
           </p>
         </div>
 
