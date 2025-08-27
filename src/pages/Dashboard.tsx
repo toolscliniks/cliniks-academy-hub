@@ -4,16 +4,34 @@ import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCourses } from '@/hooks/useCourses';
-import { Loader2, ChevronLeft, ChevronRight, Play, User, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2, ChevronLeft, ChevronRight, Play, User, LogOut, Clock } from 'lucide-react';
 import type { Course } from '@/hooks/useCourses';
 import heroImage from '@/assets/hero-image.jpg';
+
+interface IncompleteLessonWithCourse {
+  id: string;
+  title: string;
+  description?: string;
+  video_url?: string;
+  duration_minutes?: number;
+  course: {
+    id: string;
+    title: string;
+    instructor_name?: string;
+  };
+  module: {
+    title: string;
+  };
+}
 
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { courses, loading: coursesLoading } = useCourses();
   const navigate = useNavigate();
-  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
+  const [incompleteLessons, setIncompleteLessons] = useState<IncompleteLessonWithCourse[]>([]);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [lessonsLoading, setLessonsLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -22,12 +40,66 @@ const Dashboard = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && courses) {
-      // Simulate enrolled courses for "Continue watching"
-      const userEnrolledCourses = courses.slice(0, Math.min(courses.length, 10));
-      setEnrolledCourses(userEnrolledCourses);
+    if (user) {
+      fetchIncompleteLessons();
     }
-  }, [user, courses]);
+  }, [user]);
+
+  const fetchIncompleteLessons = async () => {
+    if (!user) return;
+    
+    setLessonsLoading(true);
+    try {
+      // Get lessons with progress less than 100% or no progress at all
+      const { data: lessonsData, error } = await supabase
+        .from('lessons')
+        .select(`
+          id,
+          title,
+          description,
+          video_url,
+          duration_minutes,
+          module_id,
+          modules!inner (
+            title,
+            course_id,
+            courses!inner (
+              id,
+              title,
+              instructor_name,
+              is_published
+            )
+          )
+        `)
+        .eq('modules.courses.is_published', true)
+        .limit(10);
+
+      if (error) throw error;
+
+      // Transform the data to match our interface
+      const transformedLessons: IncompleteLessonWithCourse[] = lessonsData?.map(lesson => ({
+        id: lesson.id,
+        title: lesson.title,
+        description: lesson.description,
+        video_url: lesson.video_url,
+        duration_minutes: lesson.duration_minutes,
+        course: {
+          id: lesson.modules.courses.id,
+          title: lesson.modules.courses.title,
+          instructor_name: lesson.modules.courses.instructor_name,
+        },
+        module: {
+          title: lesson.modules.title,
+        },
+      })) || [];
+
+      setIncompleteLessons(transformedLessons);
+    } catch (error) {
+      console.error('Error fetching incomplete lessons:', error);
+    } finally {
+      setLessonsLoading(false);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -37,8 +109,8 @@ const Dashboard = () => {
   const scrollCarousel = (direction: 'left' | 'right') => {
     const container = document.getElementById('progress-carousel');
     if (container) {
-      const cardWidth = 320; // Width of each progress card
-      const scrollAmount = cardWidth * 3; // Scroll 3 cards at a time
+      const cardWidth = 400; // Width of each lesson card (horizontal)
+      const scrollAmount = cardWidth * 2; // Scroll 2 cards at a time
       const newPosition = direction === 'left' 
         ? Math.max(0, scrollPosition - scrollAmount)
         : Math.min(container.scrollWidth - container.clientWidth, scrollPosition + scrollAmount);
@@ -143,46 +215,60 @@ const Dashboard = () => {
           <div className="relative">
             <div 
               id="progress-carousel"
-              className="flex space-x-8 overflow-x-auto scrollbar-hide pb-6"
+              className="flex space-x-6 overflow-x-auto scrollbar-hide pb-6"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              {coursesLoading ? (
+              {lessonsLoading ? (
                 <div className="flex items-center justify-center w-full py-16">
                   <Loader2 className="h-8 w-8 animate-spin text-white" />
                 </div>
               ) : (
-                enrolledCourses.map((course) => (
+                incompleteLessons.map((lesson) => (
                   <div 
-                    key={course.id} 
-                    className="flex-shrink-0 w-[280px] cursor-pointer transition-all duration-300 hover:scale-105"
-                    onClick={() => navigate(`/course/${course.id}`)}
+                    key={lesson.id} 
+                    className="flex-shrink-0 w-[380px] cursor-pointer transition-all duration-300 hover:scale-105"
+                    onClick={() => navigate(`/course/${lesson.course.id}/lesson/${lesson.id}`)}
                   >
                     <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-white/20">
-                      <div className="relative aspect-[708/1494] bg-gradient-to-br from-gray-700 to-gray-900">
-                        {course.cover_image_url ? (
+                      {/* Horizontal thumbnail */}
+                      <div className="relative aspect-video bg-gradient-to-br from-gray-700 to-gray-900">
+                        {lesson.video_url ? (
                           <img
-                            src={course.cover_image_url}
-                            alt={course.title}
+                            src={lesson.video_url}
+                            alt={lesson.title}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
                           />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
-                            <Play className="w-12 h-12 text-white/70" />
-                          </div>
-                        )}
+                        ) : null}
+                        <div className={lesson.video_url ? "hidden w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center" : "w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center"}>
+                          <Play className="w-12 h-12 text-white/70" />
+                        </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs mb-2">
-                            {course.difficulty_level}
+                        <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
+                          <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
+                            {lesson.module.title}
                           </Badge>
+                          {lesson.duration_minutes && (
+                            <div className="flex items-center space-x-1 bg-black/50 rounded px-2 py-1">
+                              <Clock className="w-3 h-3 text-white" />
+                              <span className="text-xs text-white">{lesson.duration_minutes}min</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="p-4">
                         <h4 className="font-semibold text-white mb-1 line-clamp-2 text-sm">
-                          {course.title}
+                          {lesson.title}
                         </h4>
-                        <p className="text-xs text-white/70">
-                          Por {course.instructor_name || 'Gustavo Medeiros'}
+                        <p className="text-xs text-white/70 mb-1">
+                          {lesson.course.title}
+                        </p>
+                        <p className="text-xs text-white/50">
+                          Por {lesson.course.instructor_name || 'Gustavo Medeiros'}
                         </p>
                       </div>
                     </div>
@@ -195,14 +281,14 @@ const Dashboard = () => {
       </section>
 
       {/* All Courses Section - Grid */}
-      <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
+      <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 py-16">
         <div className="container mx-auto px-6">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">Todos os Cursos</h3>
+          <h3 className="text-3xl font-bold text-white mb-8">Todos os Cursos</h3>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {coursesLoading ? (
               <div className="col-span-full flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
               </div>
             ) : (
               courses?.map((course) => (
@@ -211,8 +297,8 @@ const Dashboard = () => {
                   className="cursor-pointer transition-all duration-300 hover:scale-105 group"
                   onClick={() => navigate(`/course/${course.id}`)}
                 >
-                  <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                    <div className="relative aspect-[708/1494] bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-700/50">
+                    <div className="relative aspect-[708/1494] bg-gradient-to-br from-gray-700 to-gray-900">
                       {course.cover_image_url ? (
                         <img
                           src={course.cover_image_url}
@@ -220,23 +306,23 @@ const Dashboard = () => {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
-                          <Play className="w-8 h-8 text-primary/50" />
+                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                          <Play className="w-12 h-12 text-white/70" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <Badge variant="secondary" className="bg-white/90 text-gray-900 text-xs">
+                        <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs">
                           {course.difficulty_level}
                         </Badge>
                       </div>
                     </div>
-                    <div className="p-3">
-                      <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-xs">
+                    <div className="p-4">
+                      <h4 className="font-semibold text-white mb-1 line-clamp-2 text-sm">
                         {course.title}
                       </h4>
-                      <p className="text-xs text-gray-600">
-                        {course.instructor_name || 'Gustavo Medeiros'}
+                      <p className="text-xs text-white/70">
+                        Por {course.instructor_name || 'Gustavo Medeiros'}
                       </p>
                     </div>
                   </div>
