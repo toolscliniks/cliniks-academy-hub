@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit, Trash2, Upload, ExternalLink, Video, Clock, Youtube } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 
 const AdminCourses = () => {
@@ -43,6 +42,8 @@ const AdminCourses = () => {
 
   const [newModuleTitle, setNewModuleTitle] = useState('');
   const [newModuleCover, setNewModuleCover] = useState<File | null>(null);
+  const [editingModule, setEditingModule] = useState<any>(null);
+  const [isEditModuleOpen, setIsEditModuleOpen] = useState(false);
   const [fetchingYouTube, setFetchingYouTube] = useState(false);
 
   const {
@@ -53,6 +54,8 @@ const AdminCourses = () => {
     addLesson,
     fetchYouTubeInfo,
     updateCourseDuration,
+    updateModule,
+    deleteModule,
     refetch: refetchLessons
   } = useCourseLessons(managingCourse?.id || '');
 
@@ -122,14 +125,40 @@ const AdminCourses = () => {
     }
   };
 
+  const handleEditModule = async () => {
+    if (!editingModule || !newModuleTitle.trim()) return;
+    
+    try {
+      await updateModule(editingModule.id, newModuleTitle, '', newModuleCover || undefined);
+      setNewModuleTitle('');
+      setNewModuleCover(null);
+      setEditingModule(null);
+      setIsEditModuleOpen(false);
+      toast({
+        title: "Módulo atualizado com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar módulo:', error);
+      toast({
+        title: "Erro ao atualizar módulo",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteModule = async (moduleId: string) => {
+    await deleteModule(moduleId);
+  };
+
+  const openEditModule = (module: any) => {
+    setEditingModule(module);
+    setNewModuleTitle(module.title);
+    setNewModuleCover(null);
+    setIsEditModuleOpen(true);
+  };
+
   const handleAddLesson = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('handleAddLesson called', { 
-      selectedModuleId, 
-      managingCourse: managingCourse?.id, 
-      lessonFormData,
-      fetchYouTubeInfo: typeof fetchYouTubeInfo 
-    });
     
     if (!selectedModuleId) {
       console.log('No selectedModuleId');
@@ -151,15 +180,12 @@ const AdminCourses = () => {
       
       // Extract video ID from YouTube URL
       const videoId = extractYouTubeVideoId(lessonFormData.youtubeUrl);
-      console.log('Extracted video ID:', videoId);
       if (!videoId) {
         throw new Error('URL do YouTube inválida');
       }
 
       // Fetch YouTube video info
-      console.log('Calling fetchYouTubeInfo...');
       const youtubeInfo = await fetchYouTubeInfo(lessonFormData.youtubeUrl);
-      console.log('YouTube info received:', youtubeInfo);
       
       // Add lesson with YouTube data
       await addLesson(selectedModuleId, {
@@ -441,7 +467,7 @@ const AdminCourses = () => {
             </form>
           </DialogContent>
         </Dialog>
-        
+
         {/* Lessons Management Dialog */}
         <Dialog open={isLessonsOpen} onOpenChange={setIsLessonsOpen}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -478,6 +504,57 @@ const AdminCourses = () => {
                   </Button>
                 </div>
               </div>
+
+              {/* Edit Module Dialog */}
+              <Dialog open={isEditModuleOpen} onOpenChange={setIsEditModuleOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Editar Módulo</DialogTitle>
+                    <DialogDescription>
+                      Atualize as informações do módulo
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="editModuleTitle">Título do Módulo</Label>
+                      <Input
+                        id="editModuleTitle"
+                        value={newModuleTitle}
+                        onChange={(e) => setNewModuleTitle(e.target.value)}
+                        placeholder="Nome do módulo"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="editModuleCover">Nova Capa (opcional)</Label>
+                      <Input
+                        id="editModuleCover"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setNewModuleCover(e.target.files?.[0] || null)}
+                      />
+                    </div>
+                    
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setIsEditModuleOpen(false);
+                          setEditingModule(null);
+                          setNewModuleTitle('');
+                          setNewModuleCover(null);
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleEditModule} disabled={!newModuleTitle.trim()}>
+                        Salvar Alterações
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
 
               {/* Modules and Lessons */}
               {lessonsLoading ? (
@@ -520,112 +597,37 @@ const AdminCourses = () => {
                                 </CardDescription>
                               </div>
                             </div>
-                            
-                            <Dialog open={isAddLessonOpen} onOpenChange={setIsAddLessonOpen}>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => {
-                                    console.log('Opening lesson dialog for module:', module.id, 'managingCourse:', managingCourse?.id);
-                                    setSelectedModuleId(module.id);
-                                    resetLessonForm();
-                                  }}
-                                >
-                                  <Plus className="w-4 h-4 mr-2" />
-                                  Nova Aula
-                                </Button>
-                              </DialogTrigger>
-                              
-                              <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                  <DialogTitle className="flex items-center gap-2">
-                                    <Youtube className="w-5 h-5 text-red-500" />
-                                    Nova Aula - {module.title}
-                                  </DialogTitle>
-                                  <DialogDescription>
-                                    Adicione uma nova aula com vídeo do YouTube
-                                  </DialogDescription>
-                                </DialogHeader>
-                                
-                                <form onSubmit={handleAddLesson} className="space-y-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="youtubeUrl">URL do YouTube *</Label>
-                                    <Input
-                                      id="youtubeUrl"
-                                      placeholder="https://www.youtube.com/watch?v=..."
-                                      value={lessonFormData.youtubeUrl}
-                                      onChange={(e) => setLessonFormData(prev => ({ 
-                                        ...prev, 
-                                        youtubeUrl: e.target.value 
-                                      }))}
-                                      required
-                                    />
-                                    <p className="text-xs text-muted-foreground">
-                                      Cole aqui o link do YouTube. O título e duração serão capturados automaticamente.
-                                    </p>
-                                  </div>
-                                  
-                                  <div className="space-y-2">
-                                    <Label htmlFor="lessonTitle">Título da Aula (opcional)</Label>
-                                    <Input
-                                      id="lessonTitle"
-                                      placeholder="Deixe vazio para usar o título do YouTube"
-                                      value={lessonFormData.title}
-                                      onChange={(e) => setLessonFormData(prev => ({ 
-                                        ...prev, 
-                                        title: e.target.value 
-                                      }))}
-                                    />
-                                  </div>
-                                  
-                                  <div className="space-y-2">
-                                    <Label htmlFor="lessonDescription">Descrição (opcional)</Label>
-                                    <Textarea
-                                      id="lessonDescription"
-                                      placeholder="Descrição da aula..."
-                                      rows={3}
-                                      value={lessonFormData.description}
-                                      onChange={(e) => setLessonFormData(prev => ({ 
-                                        ...prev, 
-                                        description: e.target.value 
-                                      }))}
-                                    />
-                                  </div>
-                                  
-                                  <div className="flex items-center space-x-2">
-                                    <Switch
-                                      id="isFree"
-                                      checked={lessonFormData.is_free}
-                                      onCheckedChange={(checked) => setLessonFormData(prev => ({ 
-                                        ...prev, 
-                                        is_free: checked 
-                                      }))}
-                                    />
-                                    <Label htmlFor="isFree">Aula gratuita</Label>
-                                  </div>
-                                  
-                                  <div className="flex justify-end gap-2 pt-4">
-                                    <Button 
-                                      type="button" 
-                                      variant="outline" 
-                                      onClick={() => setIsAddLessonOpen(false)}
-                                    >
-                                      Cancelar
-                                    </Button>
-                                    <Button type="submit" disabled={fetchingYouTube}>
-                                      {fetchingYouTube ? (
-                                        <>Buscando dados...</>
-                                      ) : (
-                                        <>
-                                          <Plus className="w-4 h-4 mr-2" />
-                                          Adicionar Aula
-                                        </>
-                                      )}
-                                    </Button>
-                                  </div>
-                                </form>
-                              </DialogContent>
-                            </Dialog>
+
+                            <div className="flex items-center space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditModule(module)}
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Editar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteModule(module.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Excluir
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                onClick={() => {
+                                  setSelectedModuleId(module.id);
+                                  resetLessonForm();
+                                  setIsAddLessonOpen(true);
+                                }}
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Nova Aula
+                              </Button>
+                            </div>
                           </div>
                         </CardHeader>
                         
@@ -666,6 +668,99 @@ const AdminCourses = () => {
                 </div>
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Lesson Dialog */}
+        <Dialog open={isAddLessonOpen} onOpenChange={setIsAddLessonOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Youtube className="w-5 h-5 text-red-500" />
+                Nova Aula
+              </DialogTitle>
+              <DialogDescription>
+                Adicione uma nova aula com vídeo do YouTube
+              </DialogDescription>
+            </DialogHeader>
+            
+            <form onSubmit={handleAddLesson} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="youtubeUrl">URL do YouTube *</Label>
+                <Input
+                  id="youtubeUrl"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={lessonFormData.youtubeUrl}
+                  onChange={(e) => setLessonFormData(prev => ({ 
+                    ...prev, 
+                    youtubeUrl: e.target.value 
+                  }))}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Cole aqui o link do YouTube. O título e duração serão capturados automaticamente.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="lessonTitle">Título da Aula (opcional)</Label>
+                <Input
+                  id="lessonTitle"
+                  placeholder="Deixe vazio para usar o título do YouTube"
+                  value={lessonFormData.title}
+                  onChange={(e) => setLessonFormData(prev => ({ 
+                    ...prev, 
+                    title: e.target.value 
+                  }))}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="lessonDescription">Descrição (opcional)</Label>
+                <Textarea
+                  id="lessonDescription"
+                  placeholder="Descrição da aula..."
+                  rows={3}
+                  value={lessonFormData.description}
+                  onChange={(e) => setLessonFormData(prev => ({ 
+                    ...prev, 
+                    description: e.target.value 
+                  }))}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isFree"
+                  checked={lessonFormData.is_free}
+                  onCheckedChange={(checked) => setLessonFormData(prev => ({ 
+                    ...prev, 
+                    is_free: checked 
+                  }))}
+                />
+                <Label htmlFor="isFree">Aula gratuita</Label>
+              </div>
+              
+              <div className="flex justify-end gap-2 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsAddLessonOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={fetchingYouTube}>
+                  {fetchingYouTube ? (
+                    <>Buscando dados...</>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Adicionar Aula
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
           </DialogContent>
         </Dialog>
       </div>

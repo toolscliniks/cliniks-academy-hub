@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Module {
   id: string;
@@ -33,6 +34,7 @@ export const useCourseLessons = (courseId: string) => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (courseId) {
@@ -167,6 +169,74 @@ export const useCourseLessons = (courseId: string) => {
     if (error) throw error;
   };
 
+  const deleteModule = async (moduleId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este módulo e todas suas aulas?')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('modules')
+        .delete()
+        .eq('id', moduleId);
+      
+      if (error) throw error;
+      
+      setModules(prev => prev.filter(m => m.id !== moduleId));
+      toast({
+        title: "Módulo excluído!",
+        description: "O módulo foi removido com sucesso."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const updateModule = async (moduleId: string, title: string, description: string = '', coverImage?: File) => {
+    try {
+      let cover_image_url = modules.find(m => m.id === moduleId)?.cover_image_url;
+      
+      // Upload new cover image if provided
+      if (coverImage) {
+        const fileExt = coverImage.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        const filePath = `${courseId}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('course-covers')
+          .upload(filePath, coverImage);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('course-covers')
+          .getPublicUrl(filePath);
+
+        cover_image_url = publicUrl;
+      }
+      
+      const { data, error } = await supabase
+        .from('modules')
+        .update({
+          title,
+          description,
+          cover_image_url
+        })
+        .eq('id', moduleId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setModules(prev => prev.map(m => m.id === moduleId ? data : m));
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     modules,
     lessons,
@@ -176,6 +246,8 @@ export const useCourseLessons = (courseId: string) => {
     addLesson,
     fetchYouTubeInfo,
     updateCourseDuration,
+    updateModule,
+    deleteModule,
     refetch: fetchModulesAndLessons
   };
 };
