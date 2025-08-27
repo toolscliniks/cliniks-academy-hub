@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Search, Mail, Calendar, UserCheck } from 'lucide-react';
+import { Users, Search, Mail, Calendar, UserCheck, Edit, Save } from 'lucide-react';
 
 interface Profile {
   id: string;
@@ -21,6 +24,8 @@ const AdminUsers = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [editingUser, setEditingUser] = useState<Profile | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchProfiles();
@@ -67,6 +72,46 @@ const AdminUsers = () => {
         return 'default';
       default:
         return 'secondary';
+    }
+  };
+
+  const handleEditUser = (user: Profile) => {
+    setEditingUser(user);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editingUser.full_name,
+          email: editingUser.email,
+          role: editingUser.role
+        })
+        .eq('id', editingUser.id);
+
+      if (error) throw error;
+
+      setProfiles(profiles.map(p => 
+        p.id === editingUser.id ? editingUser : p
+      ));
+
+      toast({
+        title: "Usuário atualizado",
+        description: "Os dados do usuário foram atualizados com sucesso"
+      });
+
+      setIsEditDialogOpen(false);
+      setEditingUser(null);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar usuário",
+        description: error.message,
+        variant: "destructive"
+      });
     }
   };
 
@@ -159,10 +204,19 @@ const AdminUsers = () => {
                     </CardDescription>
                   </div>
                 </div>
-                <Badge variant={getRoleColor(profile.role || 'user')}>
-                  {profile.role === 'admin' ? 'Admin' : 
-                   profile.role === 'moderator' ? 'Moderador' : 'Usuário'}
-                </Badge>
+                <div className="flex items-center space-x-2">
+                  <Badge variant={getRoleColor(profile.role || 'user')}>
+                    {profile.role === 'admin' ? 'Admin' : 
+                     profile.role === 'moderator' ? 'Moderador' : 'Usuário'}
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditUser(profile)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             
@@ -193,6 +247,74 @@ const AdminUsers = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Usuário</DialogTitle>
+            <DialogDescription>
+              Edite as informações do usuário selecionado
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingUser && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Nome Completo</Label>
+                <Input
+                  id="fullName"
+                  value={editingUser.full_name || ''}
+                  onChange={(e) => setEditingUser({
+                    ...editingUser,
+                    full_name: e.target.value
+                  })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={editingUser.email || ''}
+                  onChange={(e) => setEditingUser({
+                    ...editingUser,
+                    email: e.target.value
+                  })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="role">Função</Label>
+                <select
+                  id="role"
+                  className="w-full p-2 border rounded-md bg-background"
+                  value={editingUser.role || 'user'}
+                  onChange={(e) => setEditingUser({
+                    ...editingUser,
+                    role: e.target.value
+                  })}
+                >
+                  <option value="user">Usuário</option>
+                  <option value="moderator">Moderador</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveUser}>
+              <Save className="w-4 h-4 mr-2" />
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

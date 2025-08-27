@@ -2,90 +2,95 @@ import { useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
+interface ActivityOptions {
+  courseId?: string;
+  lessonId?: string;
+  metadata?: any;
+}
+
 export const useUserActivity = () => {
   const { user } = useAuth();
 
+  const logActivity = async (type: string, description: string, options?: ActivityOptions) => {
+    if (!user?.id) return;
+
+    try {
+      await supabase
+        .from('user_activity_log')
+        .insert({
+          user_id: user.id,
+          activity_type: type,
+          activity_description: description,
+          course_id: options?.courseId || null,
+          lesson_id: options?.lessonId || null,
+          metadata: options?.metadata || null
+        });
+    } catch (error) {
+      console.error('Error logging activity:', error);
+    }
+  };
+
+  const trackSession = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Update last activity
+      await supabase
+        .from('user_sessions')
+        .upsert({
+          user_id: user.id,
+          last_activity: new Date().toISOString(),
+          is_active: true,
+          ip_address: null,
+          user_agent: navigator.userAgent
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        });
+    } catch (error) {
+      console.error('Error tracking session:', error);
+    }
+  };
+
   useEffect(() => {
-    if (!user) return;
+    if (!user?.id) return;
 
-    // Create or update user session
-    const updateSession = async () => {
-      try {
-        const { error } = await supabase
-          .from('user_sessions')
-          .upsert({
-            user_id: user.id,
-            last_activity: new Date().toISOString(),
-            is_active: true,
-            ip_address: '0.0.0.0', // You can get real IP if needed
-            user_agent: navigator.userAgent
-          });
+    // Track initial session
+    trackSession();
 
-        if (error) console.error('Error updating session:', error);
-      } catch (error) {
-        console.error('Error in updateSession:', error);
-      }
-    };
+    // Set up periodic activity tracking
+    const interval = setInterval(trackSession, 30000); // Every 30 seconds
 
-    // Initial session update
-    updateSession();
-
-    // Update session every 30 seconds
-    const interval = setInterval(updateSession, 30000);
-
-    // Handle page visibility change
+    // Track page visibility changes
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        updateSession();
+      if (document.visibilityState === 'visible') {
+        trackSession();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Cleanup on unmount
+    // Cleanup on unmount or user change
     return () => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       
-      // Mark session as inactive when component unmounts
-      supabase
-        .from('user_sessions')
-        .update({ 
-          is_active: false,
-          session_end: new Date().toISOString()
-        })
-        .eq('user_id', user.id)
-        .eq('is_active', true);
+      // Mark session as inactive
+      if (user?.id) {
+        supabase
+          .from('user_sessions')
+          .update({ 
+            is_active: false, 
+            session_end: new Date().toISOString() 
+          })
+          .eq('user_id', user.id)
+          .then(() => {});
+      }
     };
-  }, [user]);
+  }, [user?.id]);
 
-  const logActivity = async (
-    activityType: string, 
-    description?: string, 
-    courseId?: string, 
-    lessonId?: string,
-    metadata?: any
-  ) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('user_activity_log')
-        .insert({
-          user_id: user.id,
-          activity_type: activityType,
-          activity_description: description,
-          course_id: courseId,
-          lesson_id: lessonId,
-          metadata: metadata,
-          created_at: new Date().toISOString()
-        });
-
-      if (error) console.error('Error logging activity:', error);
-    } catch (error) {
-      console.error('Error in logActivity:', error);
-    }
+  return {
+    logActivity,
+    trackSession
   };
-
-  return { logActivity };
 };
