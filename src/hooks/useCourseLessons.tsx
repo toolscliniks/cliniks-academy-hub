@@ -6,6 +6,7 @@ export interface Module {
   course_id: string;
   title: string;
   description: string | null;
+  cover_image_url: string | null;
   order_index: number;
   created_at: string;
   updated_at: string;
@@ -70,8 +71,29 @@ export const useCourseLessons = (courseId: string) => {
     }
   };
 
-  const createModule = async (title: string, description: string = '') => {
+  const createModule = async (title: string, description: string = '', coverImage?: File) => {
     const maxOrder = Math.max(...modules.map(m => m.order_index), 0);
+    
+    let cover_image_url = null;
+    
+    // Upload cover image if provided
+    if (coverImage) {
+      const fileExt = coverImage.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `${courseId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('course-covers')
+        .upload(filePath, coverImage);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('course-covers')
+        .getPublicUrl(filePath);
+
+      cover_image_url = publicUrl;
+    }
     
     const { data, error } = await supabase
       .from('modules')
@@ -79,6 +101,7 @@ export const useCourseLessons = (courseId: string) => {
         course_id: courseId,
         title,
         description,
+        cover_image_url,
         order_index: maxOrder + 1
       }])
       .select()

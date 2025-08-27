@@ -42,6 +42,7 @@ const AdminCourses = () => {
   });
 
   const [newModuleTitle, setNewModuleTitle] = useState('');
+  const [newModuleCover, setNewModuleCover] = useState<File | null>(null);
   const [fetchingYouTube, setFetchingYouTube] = useState(false);
 
   const {
@@ -103,20 +104,20 @@ const AdminCourses = () => {
   };
 
   const handleCreateModule = async () => {
-    if (!newModuleTitle.trim()) return;
+    if (!newModuleTitle.trim() || !managingCourse?.id) return;
     
     try {
-      await createModule(newModuleTitle);
+      await createModule(newModuleTitle, '', newModuleCover || undefined);
       setNewModuleTitle('');
+      setNewModuleCover(null);
       toast({
-        title: "Módulo criado!",
-        description: "O novo módulo foi adicionado ao curso."
+        title: "Módulo criado com sucesso!",
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Erro ao criar módulo:', error);
       toast({
-        title: "Erro",
-        description: error.message,
-        variant: "destructive"
+        title: "Erro ao criar módulo",
+        variant: "destructive",
       });
     }
   };
@@ -442,6 +443,12 @@ const AdminCourses = () => {
                     onChange={(e) => setNewModuleTitle(e.target.value)}
                     className="flex-1"
                   />
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setNewModuleCover(e.target.files?.[0] || null)}
+                    className="flex-shrink-0 w-48"
+                  />
                   <Button onClick={handleCreateModule} disabled={!newModuleTitle.trim()}>
                     <Plus className="w-4 h-4 mr-2" />
                     Criar Módulo
@@ -471,15 +478,24 @@ const AdminCourses = () => {
                       <Card key={module.id} className="border-l-4 border-l-primary/50">
                         <CardHeader>
                           <div className="flex items-center justify-between">
-                            <div>
-                              <CardTitle className="text-lg">{module.title}</CardTitle>
-                              <CardDescription className="flex items-center gap-4 mt-1">
-                                <span>{moduleLessons.length} aula{moduleLessons.length !== 1 ? 's' : ''}</span>
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {Math.floor(totalDuration / 60)}h {totalDuration % 60}min
-                                </span>
-                              </CardDescription>
+                            <div className="flex items-center space-x-4">
+                              {module.cover_image_url && (
+                                <img 
+                                  src={module.cover_image_url} 
+                                  alt={module.title}
+                                  className="w-16 h-16 object-cover rounded-lg"
+                                />
+                              )}
+                              <div>
+                                <CardTitle className="text-lg">{module.title}</CardTitle>
+                                <CardDescription className="flex items-center gap-4 mt-1">
+                                  <span>{moduleLessons.length} aula{moduleLessons.length !== 1 ? 's' : ''}</span>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {Math.floor(totalDuration / 60)}h {totalDuration % 60}min
+                                  </span>
+                                </CardDescription>
+                              </div>
                             </div>
                             
                             <Dialog open={isAddLessonOpen} onOpenChange={setIsAddLessonOpen}>
