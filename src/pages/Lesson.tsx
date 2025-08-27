@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import VideoPlayer from '@/components/VideoPlayer';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Clock, Play, CheckCircle, Lock } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Clock, 
+  Play, 
+  CheckCircle, 
+  Lock,
+  Award
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Lesson {
@@ -43,6 +50,7 @@ const Lesson = () => {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [module, setModule] = useState<Module | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
+  const [enrollment, setEnrollment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -87,17 +95,18 @@ const Lesson = () => {
         setHasAccess(lessonData.is_free);
       } else {
         // Check if user is enrolled in the course
-        const { data: enrollment } = await supabase
+        const { data: enrollmentData } = await supabase
           .from('course_enrollments')
-          .select('id')
+          .select('*')
           .eq('user_id', user.id)
           .eq('course_id', lessonData.modules.course_id)
-          .single();
+          .maybeSingle();
 
-        setHasAccess(!!enrollment);
+        setHasAccess(!!enrollmentData);
+        setEnrollment(enrollmentData);
 
         // Check if lesson is completed
-        if (enrollment) {
+        if (enrollmentData) {
           const { data: progress } = await supabase
             .from('lesson_progress')
             .select('is_completed')
@@ -269,6 +278,53 @@ const Lesson = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
+              {enrollment && enrollment.completed_at && (
+                <Card className="bg-gradient-card border-border/50 mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Award className="w-5 h-5 text-yellow-500" />
+                      Curso Concluído!
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Parabéns! Você concluiu o curso. Baixe seu certificado.
+                    </p>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const { data, error } = await supabase.functions.invoke('generate-certificate-pdf', {
+                            body: { courseId: course.id }
+                          });
+                          
+                          if (error) throw error;
+                          
+                          // Open certificate in new tab
+                          if (data?.certificateUrl) {
+                            window.open(data.certificateUrl, '_blank');
+                          }
+                          
+                          toast({
+                            title: "Certificado gerado!",
+                            description: "Seu certificado foi gerado com sucesso."
+                          });
+                        } catch (error: any) {
+                          toast({
+                            title: "Erro",
+                            description: error.message || "Erro ao gerar certificado",
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                      className="w-full"
+                    >
+                      <Award className="w-4 h-4 mr-2" />
+                      Baixar Certificado
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
             {hasAccess && !isCompleted && (
               <Card className="bg-gradient-card border-border/50 mb-6">
                 <CardHeader>

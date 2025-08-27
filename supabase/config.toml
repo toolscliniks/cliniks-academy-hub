@@ -39,5 +39,14 @@ verify_jwt = false
 [functions.send-webhook]
 verify_jwt = false
 
+[functions.generate-certificate-pdf]
+verify_jwt = true
+
+[functions.payment-webhook-asaas]
+verify_jwt = false
+
+[functions.create-payment-asaas]
+verify_jwt = true
+
 [functions.youtube-video-info]
 verify_jwt = true

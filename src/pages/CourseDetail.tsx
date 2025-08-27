@@ -139,44 +139,72 @@ const CourseDetail = () => {
     }
 
     if (course?.price && course.price > 0) {
-      // TODO: Redirect to payment page
-      toast({
-        title: "Pagamento",
-        description: "Sistema de pagamento será implementado em breve",
-        variant: "default"
-      });
-      return;
-    }
+      // Paid course - redirect to payment
+      try {
+        setEnrolling(true);
+        
+        const { data, error } = await supabase.functions.invoke('create-payment-asaas', {
+          body: {
+            courseId: course.id,
+            customerName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+            customerEmail: user.email
+          }
+        });
 
-    // Free course - enroll directly
-    try {
-      setEnrolling(true);
-      
-      const { error } = await supabase
-        .from('course_enrollments')
-        .insert([{
-          user_id: user.id,
-          course_id: course!.id
-        }]);
+        if (error) throw error;
 
-      if (error) throw error;
+        if (data?.pixQrCode || data?.invoiceUrl) {
+          // Show payment modal or redirect to payment page
+          toast({
+            title: "Pagamento Criado",
+            description: "Redirecionando para o pagamento..."
+          });
+          
+          // For now, we'll show the PIX QR code in a simple way
+          // In a real implementation, you'd create a proper payment modal
+          if (data.invoiceUrl) {
+            window.open(data.invoiceUrl, '_blank');
+          }
+        }
+      } catch (error: any) {
+        toast({
+          title: "Erro",
+          description: error.message || "Erro ao processar pagamento",
+          variant: "destructive"
+        });
+      } finally {
+        setEnrolling(false);
+      }
+    } else {
+      // Free course - enroll directly
+      try {
+        setEnrolling(true);
+        
+        const { error } = await supabase
+          .from('course_enrollments')
+          .insert([{
+            user_id: user.id,
+            course_id: course!.id
+          }]);
 
-      toast({
-        title: "Sucesso!",
-        description: "Você foi inscrito no curso com sucesso!"
-      });
+        if (error) throw error;
 
-      // Refresh enrollment data
-      fetchCourseData();
-    } catch (error) {
-      console.error('Error enrolling:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível se inscrever no curso",
-        variant: "destructive"
-      });
-    } finally {
-      setEnrolling(false);
+        toast({
+          title: "Sucesso!",
+          description: "Você foi inscrito no curso com sucesso!"
+        });
+
+        // Refresh enrollment data
+        fetchCourseData();
+      } catch (error: any) {
+        toast({
+          title: "Erro",
+          description: error.message || "Não foi possível se inscrever no curso",
+          variant: "destructive"
+        });
+      } finally {
+        setEnrolling(false);
+      }
     }
   };
 
