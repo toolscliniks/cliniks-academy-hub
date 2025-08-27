@@ -8,6 +8,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 import AdminCourses from '@/components/admin/AdminCourses';
 import LessonManagement from '@/components/admin/LessonManagement';
+import ModuleManagement from '@/components/admin/ModuleManagement';
+import ImageManagement from '@/components/admin/ImageManagement';
 import AdminUsers from '@/components/admin/AdminUsers';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
@@ -158,9 +160,11 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-11 mb-8">
+          <TabsList className="grid w-full grid-cols-13 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
             <TabsTrigger value="lessons">Aulas</TabsTrigger>
+            <TabsTrigger value="modules">Módulos</TabsTrigger>
+            <TabsTrigger value="images">Imagens</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="monitoring">Monitor</TabsTrigger>
@@ -179,6 +183,14 @@ const Admin = () => {
 
           <TabsContent value="lessons">
             <LessonManagement />
+          </TabsContent>
+          
+          <TabsContent value="modules">
+            <ModuleManagement />
+          </TabsContent>
+          
+          <TabsContent value="images">
+            <ImageManagement />
           </TabsContent>
           
           <TabsContent value="plans">

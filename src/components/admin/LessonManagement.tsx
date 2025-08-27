@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Video, Youtube, Upload, Clock, BookOpen, Edit, Trash2, Play, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, Video, Youtube, Upload, Clock, BookOpen, Edit, Trash2, Play, ChevronDown, ChevronRight, Save, X, Image } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const LessonManagement = () => {
@@ -23,8 +23,17 @@ const LessonManagement = () => {
   const [selectedModuleId, setSelectedModuleId] = useState<string>('');
   const [fetchingYouTube, setFetchingYouTube] = useState(false);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [editingLesson, setEditingLesson] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState<string | null>(null);
   
   const [lessonFormData, setLessonFormData] = useState({
+    title: '',
+    description: '',
+    youtubeUrl: '',
+    is_free: false
+  });
+
+  const [editFormData, setEditFormData] = useState({
     title: '',
     description: '',
     youtubeUrl: '',
@@ -136,6 +145,167 @@ const LessonManagement = () => {
       newExpanded.add(moduleId);
     }
     setExpandedModules(newExpanded);
+  };
+
+  const handleEditLesson = async (lessonId: string) => {
+    if (!editFormData.title.trim()) {
+      toast({
+        title: "Erro",
+        description: "O título da aula é obrigatório.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      let updateData: any = {
+        title: editFormData.title.trim(),
+        description: editFormData.description.trim() || null,
+        is_free: editFormData.is_free
+      };
+
+      // If YouTube URL is provided, fetch video info
+      if (editFormData.youtubeUrl.trim()) {
+        try {
+          const videoInfo = await fetchYouTubeInfo(editFormData.youtubeUrl);
+          if (videoInfo) {
+            updateData = {
+              ...updateData,
+              video_type: 'youtube',
+              external_video_id: videoInfo.id,
+              external_video_platform: 'youtube',
+              duration_minutes: Math.ceil(videoInfo.duration / 60)
+            };
+          }
+        } catch (error) {
+          console.error('Error fetching YouTube info:', error);
+        }
+      }
+
+      const { error } = await supabase
+        .from('lessons')
+        .update(updateData)
+        .eq('id', lessonId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "Aula atualizada com sucesso."
+      });
+
+      setEditingLesson(null);
+      refetchLessons();
+    } catch (error: any) {
+      console.error('Error updating lesson:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao atualizar aula.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: string, lessonTitle: string) => {
+    if (!confirm(`Tem certeza que deseja excluir a aula "${lessonTitle}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('lessons')
+        .delete()
+        .eq('id', lessonId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "Aula excluída com sucesso."
+      });
+
+      refetchLessons();
+    } catch (error: any) {
+      console.error('Error deleting lesson:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao excluir aula.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const startEditingLesson = (lesson: any) => {
+    setEditingLesson(lesson.id);
+    setEditFormData({
+      title: lesson.title,
+      description: lesson.description || '',
+      youtubeUrl: lesson.external_video_platform === 'youtube' 
+        ? `https://youtube.com/watch?v=${lesson.external_video_id}` 
+        : '',
+      is_free: lesson.is_free
+    });
+  };
+
+  const cancelEditingLesson = () => {
+    setEditingLesson(null);
+    setEditFormData({
+      title: '',
+      description: '',
+      youtubeUrl: '',
+      is_free: false
+    });
+  };
+
+  const handleImageUpload = async (lessonId: string, file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione um arquivo de imagem válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setUploadingImage(lessonId);
+    try {
+      // Upload to storage
+      const fileName = `lesson-covers/${lessonId}-${Date.now()}.${file.name.split('.').pop()}`;
+      const { error: uploadError } = await supabase.storage
+        .from('course-covers')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data } = supabase.storage
+        .from('course-covers')
+        .getPublicUrl(fileName);
+
+      // Update lesson with new video_url (using as cover image)
+      const { error: updateError } = await supabase
+        .from('lessons')
+        .update({ video_url: data.publicUrl })
+        .eq('id', lessonId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Sucesso!",
+        description: "Imagem da aula atualizada com sucesso."
+      });
+
+      refetchLessons();
+    } catch (error: any) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao fazer upload da imagem.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingImage(null);
+    }
   };
 
   if (coursesLoading) {
@@ -356,44 +526,143 @@ const LessonManagement = () => {
                                     .map((lesson: any, index: number) => (
                                       <div
                                         key={lesson.id}
-                                        className="flex items-center justify-between p-4 border rounded-lg bg-card"
+                                        className="border rounded-lg bg-card"
                                       >
-                                        <div className="flex items-center gap-3">
-                                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                                            {index + 1}
-                                          </div>
-                                          <div>
-                                            <h4 className="font-medium">{lesson.title}</h4>
-                                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                              {lesson.video_type === 'youtube' && (
-                                                <div className="flex items-center gap-1">
-                                                  <Youtube className="w-4 h-4" />
-                                                  <span>YouTube</span>
-                                                </div>
-                                              )}
-                                              {lesson.duration_minutes > 0 && (
-                                                <div className="flex items-center gap-1">
-                                                  <Clock className="w-4 h-4" />
-                                                  <span>{lesson.duration_minutes}min</span>
-                                                </div>
-                                              )}
-                                              {lesson.is_free && (
-                                                <Badge variant="secondary" className="text-xs">
-                                                  Gratuita
-                                                </Badge>
-                                              )}
+                                        {editingLesson === lesson.id ? (
+                                          <div className="p-4 space-y-3">
+                                            <Input
+                                              value={editFormData.title}
+                                              onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))}
+                                              placeholder="Título da aula"
+                                            />
+                                            <Input
+                                              value={editFormData.youtubeUrl}
+                                              onChange={(e) => setEditFormData(prev => ({ ...prev, youtubeUrl: e.target.value }))}
+                                              placeholder="URL do YouTube (opcional)"
+                                            />
+                                            <Textarea
+                                              value={editFormData.description}
+                                              onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                                              placeholder="Descrição da aula (opcional)"
+                                              className="min-h-[60px]"
+                                            />
+                                            <div className="flex items-center space-x-2">
+                                              <Switch
+                                                checked={editFormData.is_free}
+                                                onCheckedChange={(checked) => setEditFormData(prev => ({ ...prev, is_free: checked }))}
+                                              />
+                                              <Label>Aula gratuita</Label>
+                                            </div>
+                                            <div className="flex gap-2">
+                                              <Button 
+                                                size="sm" 
+                                                onClick={() => handleEditLesson(lesson.id)}
+                                                disabled={!editFormData.title.trim()}
+                                              >
+                                                <Save className="w-4 h-4 mr-1" />
+                                                Salvar
+                                              </Button>
+                                              <Button 
+                                                size="sm" 
+                                                variant="outline" 
+                                                onClick={cancelEditingLesson}
+                                              >
+                                                <X className="w-4 h-4 mr-1" />
+                                                Cancelar
+                                              </Button>
                                             </div>
                                           </div>
-                                        </div>
-                                        
-                                        <div className="flex items-center gap-2">
-                                          <Button variant="ghost" size="sm">
-                                            <Edit className="w-4 h-4" />
-                                          </Button>
-                                          <Button variant="ghost" size="sm" className="text-destructive">
-                                            <Trash2 className="w-4 h-4" />
-                                          </Button>
-                                        </div>
+                                        ) : (
+                                          <div className="flex items-center justify-between p-4">
+                                            <div className="flex items-center gap-3 flex-1">
+                                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                                                {index + 1}
+                                              </div>
+                                              <div className="flex-1">
+                                                <h4 className="font-medium">{lesson.title}</h4>
+                                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                  {lesson.video_type === 'youtube' && (
+                                                    <div className="flex items-center gap-1">
+                                                      <Youtube className="w-4 h-4" />
+                                                      <span>YouTube</span>
+                                                    </div>
+                                                  )}
+                                                  {lesson.duration_minutes > 0 && (
+                                                    <div className="flex items-center gap-1">
+                                                      <Clock className="w-4 h-4" />
+                                                      <span>{lesson.duration_minutes}min</span>
+                                                    </div>
+                                                  )}
+                                                  {lesson.is_free && (
+                                                    <Badge variant="secondary" className="text-xs">
+                                                      Gratuita
+                                                    </Badge>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-2">
+                                              {/* Lesson Image/Cover */}
+                                              <div className="relative">
+                                                <div className="w-16 h-9 bg-muted rounded overflow-hidden">
+                                                  {lesson.video_url ? (
+                                                    <img
+                                                      src={lesson.video_url}
+                                                      alt={lesson.title}
+                                                      className="w-full h-full object-cover"
+                                                    />
+                                                  ) : (
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                      <Image className="w-4 h-4 text-muted-foreground/50" />
+                                                    </div>
+                                                  )}
+                                                </div>
+                                                <input
+                                                  type="file"
+                                                  accept="image/*"
+                                                  className="hidden"
+                                                  id={`lesson-image-${lesson.id}`}
+                                                  onChange={(e) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (file) {
+                                                      handleImageUpload(lesson.id, file);
+                                                    }
+                                                  }}
+                                                />
+                                                <Button
+                                                  size="sm"
+                                                  variant="ghost"
+                                                  className="absolute -top-1 -right-1 h-5 w-5 p-0"
+                                                  onClick={() => document.getElementById(`lesson-image-${lesson.id}`)?.click()}
+                                                  disabled={uploadingImage === lesson.id}
+                                                >
+                                                  {uploadingImage === lesson.id ? (
+                                                    <div className="animate-spin rounded-full h-3 w-3 border border-primary border-t-transparent" />
+                                                  ) : (
+                                                    <Upload className="w-3 h-3" />
+                                                  )}
+                                                </Button>
+                                              </div>
+                                              
+                                              <Button 
+                                                variant="ghost" 
+                                                size="sm"
+                                                onClick={() => startEditingLesson(lesson)}
+                                              >
+                                                <Edit className="w-4 h-4" />
+                                              </Button>
+                                              <Button 
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="text-destructive hover:text-destructive"
+                                                onClick={() => handleDeleteLesson(lesson.id, lesson.title)}
+                                              >
+                                                <Trash2 className="w-4 h-4" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        )}
                                       </div>
                                     ))
                                   }

@@ -143,10 +143,20 @@ export const useCourseLessons = (courseId: string) => {
 
     if (error) throw error;
     
-    setLessons(prev => [...prev, {
+    const newLesson = {
       ...data,
       video_type: data.video_type as 'upload' | 'youtube' | 'vimeo'
-    }]);
+    };
+    
+    setLessons(prev => [...prev, newLesson]);
+    
+    // Update course duration after adding lesson
+    try {
+      await updateCourseDuration();
+    } catch (error) {
+      console.error('Error updating course duration:', error);
+    }
+    
     return data;
   };
 
@@ -164,7 +174,9 @@ export const useCourseLessons = (courseId: string) => {
   };
 
   const updateCourseDuration = async () => {
-    const totalMinutes = lessons.reduce((total, lesson) => total + lesson.duration_minutes, 0);
+    if (!courseId) return;
+    
+    const totalMinutes = lessons.reduce((total, lesson) => total + (lesson.duration_minutes || 0), 0);
     const totalHours = Math.ceil(totalMinutes / 60);
 
     const { error } = await supabase
