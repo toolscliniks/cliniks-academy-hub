@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, BookOpen, Users, Settings, BarChart3, TestTube, CreditCard, UserPlus, Bell, Monitor, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
-import AdminUsers from '@/components/admin/AdminUsers';
 import AdminCourses from '@/components/admin/AdminCourses';
+import LessonManagement from '@/components/admin/LessonManagement';
+import AdminUsers from '@/components/admin/AdminUsers';
 import AdminPlans from '@/components/admin/AdminPlans';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import AdminSettings from '@/components/admin/AdminSettings';
@@ -159,6 +160,7 @@ const Admin = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-11 mb-8">
             <TabsTrigger value="courses">Cursos</TabsTrigger>
+            <TabsTrigger value="lessons">Aulas</TabsTrigger>
             <TabsTrigger value="plans">Planos</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="monitoring">Monitor</TabsTrigger>
@@ -173,6 +175,10 @@ const Admin = () => {
           
           <TabsContent value="courses">
             <AdminCourses />
+          </TabsContent>
+
+          <TabsContent value="lessons">
+            <LessonManagement />
           </TabsContent>
           
           <TabsContent value="plans">

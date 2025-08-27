@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Award, Download, Eye, Calendar } from 'lucide-react';
+import { Award, Download, Eye, Calendar, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Certificate {
@@ -23,6 +24,7 @@ interface Certificate {
 const Certificates = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -85,6 +87,16 @@ const Certificates = () => {
     <div className="min-h-screen bg-gradient-hero">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar ao Dashboard
+            </Button>
+          </div>
           <h1 className="text-3xl font-bold">Meus Certificados</h1>
           <p className="text-muted-foreground">Certificados dos cursos concluídos</p>
         </div>

@@ -19,7 +19,7 @@ export interface Lesson {
   title: string;
   description: string | null;
   video_url: string | null;
-  video_type: string;
+  video_type: 'upload' | 'youtube' | 'vimeo';
   external_video_id: string | null;
   external_video_platform: string | null;
   duration_minutes: number;
@@ -65,7 +65,10 @@ export const useCourseLessons = (courseId: string) => {
       if (lessonsError) throw lessonsError;
 
       setModules(modulesData || []);
-      setLessons(lessonsData || []);
+      setLessons(lessonsData?.map(lesson => ({
+        ...lesson,
+        video_type: lesson.video_type as 'upload' | 'youtube' | 'vimeo'
+      })) || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar aulas');
     } finally {
@@ -119,10 +122,10 @@ export const useCourseLessons = (courseId: string) => {
     title: string;
     description?: string;
     video_url?: string;
-    video_type: string;
-    external_video_id?: string;
-    external_video_platform?: string;
-    duration_minutes: number;
+    video_type?: 'upload' | 'youtube' | 'vimeo';
+    external_video_id?: string | null;
+    external_video_platform?: string | null;
+    duration_minutes?: number;
     is_free?: boolean;
   }) => {
     const modulelessons = lessons.filter(l => l.module_id === moduleId);
@@ -140,7 +143,10 @@ export const useCourseLessons = (courseId: string) => {
 
     if (error) throw error;
     
-    setLessons(prev => [...prev, data]);
+    setLessons(prev => [...prev, {
+      ...data,
+      video_type: data.video_type as 'upload' | 'youtube' | 'vimeo'
+    }]);
     return data;
   };
 
