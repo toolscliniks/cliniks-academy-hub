@@ -32,6 +32,7 @@ const AdminCourses = () => {
     category: '',
     cover_image_url: '',
     trailer_video_url: '',
+    commercial_video_url: '',
     price: '',
     currency: 'BRL'
   });
@@ -276,6 +277,7 @@ const AdminCourses = () => {
       category: '',
       cover_image_url: '',
       trailer_video_url: '',
+      commercial_video_url: '',
       price: '',
       currency: 'BRL'
     });
@@ -287,12 +289,13 @@ const AdminCourses = () => {
       title: course.title,
       description: course.description || '',
       instructor_name: course.instructor_name || '',
-      duration_hours: course.duration_hours,
-      difficulty_level: course.difficulty_level,
+      duration_hours: course.duration_hours || 0,
+      difficulty_level: course.difficulty_level || 'Iniciante',
       category: course.category || '',
       cover_image_url: course.cover_image_url || '',
       trailer_video_url: course.trailer_video_url || '',
-      price: course.price?.toString() || '',
+      commercial_video_url: course.commercial_video_url || '',
+      price: course.price ? course.price.toString() : '',
       currency: course.currency || 'BRL'
     });
     setIsCreateOpen(true);
@@ -487,6 +490,19 @@ const AdminCourses = () => {
                 />
                 <p className="text-xs text-muted-foreground">
                   URL do YouTube para vídeo de propaganda que ficará rodando em loop na página do curso (estilo Netflix)
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="commercial_video">Vídeo Comercial</Label>
+                <Input
+                  id="commercial_video"
+                  value={formData.commercial_video_url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, commercial_video_url: e.target.value }))}
+                  placeholder="https://exemplo.com/video-comercial.mp4"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Este vídeo será exibido automaticamente quando o usuário passar o mouse sobre o card do curso.
                 </p>
               </div>
               

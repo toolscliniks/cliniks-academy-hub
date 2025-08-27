@@ -6,6 +6,7 @@ export interface Course {
   title: string;
   description: string | null;
   cover_image_url: string | null;
+  commercial_video_url?: string | null;
   instructor_name: string | null;
   duration_hours: number;
   difficulty_level: string;

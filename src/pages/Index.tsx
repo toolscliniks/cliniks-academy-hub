@@ -42,7 +42,17 @@ const Index = () => {
           </p>
           
           {/* Floating Persuasion Bubbles with enhanced animations */}
-          <div className="absolute -top-10 left-10 hidden lg:block">
+          <div className="absolute -top-30 left-10 hidden lg:block">
+            <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float animate-pulse-glow max-w-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="w-5 h-5 text-primary" />
+                <span className="text-sm font-semibold text-primary">+800 clínicas</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Alavancaram suas carreiras</p>
+            </div>
+          </div>
+
+          <div className="absolute -top-50 left-10 hidden lg:block">
             <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float animate-pulse-glow max-w-xs">
               <div className="flex items-center gap-2 mb-2">
                 <Award className="w-5 h-5 text-primary" />
@@ -52,8 +62,17 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="absolute -top-5 right-20 hidden lg:block">
-            <div className="bg-gradient-card border border-accent/20 rounded-2xl p-4 shadow-elegant animate-drift max-w-xs" style={{animationDelay: '1.5s'}}>
+          <div className="absolute -top-50 right-1/3 hidden lg:block">
+            <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float animate-pulse-glow max-w-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-5 h-5 text-accent" />
+                <span className="text-sm font-semibold text-accent">Método certificado!</span>
+              </div>
+              <p className="text-xs text-muted-foreground">Método validado pelos orgãos competentes</p>
+            </div>
+          </div>
+          <div className="absolute -top-70 right-1/3 hidden lg:block">
+            <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float animate-pulse-glow max-w-xs">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-accent" />
                 <span className="text-sm font-semibold text-accent">Método certificado!</span>
@@ -62,7 +81,7 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="absolute top-32 left-1/4 hidden xl:block">
+          <div className="absolute top-52 left-60 hidden xl:block">
             <div className="bg-gradient-card border border-secondary/20 rounded-2xl p-4 shadow-glow animate-float animate-shimmer max-w-xs" style={{animationDelay: '2.5s'}}>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="w-5 h-5 text-secondary" />
@@ -72,8 +91,8 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="absolute top-20 right-1/4 hidden xl:block">
-            <div className="bg-gradient-card border border-yellow-500/20 rounded-2xl p-4 shadow-elegant animate-drift max-w-xs" style={{animationDelay: '3s'}}>
+          <div className="absolute top-50 right-60 hidden xl:block">
+            <div className="bg-gradient-card border border-primary/20 rounded-2xl p-4 shadow-glow animate-float animate-pulse-glow max-w-xs">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-5 h-5 text-yellow-500" />
                 <span className="text-sm font-semibold text-yellow-500">+1000 Alunos</span>
@@ -87,10 +106,7 @@ const Index = () => {
       {/* Courses Section */}
       <main className="container mx-auto px-4 pb-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4 text-foreground">Cursos dentro da Cliniks Academy</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Faça o cadastro e seja +1 clinikers!
-          </p>
+          <h2 className="text-3xl font-bold mb-4 text-foreground">Alguns dos nossos Cursos na Cliniks Academy</h2>
         </div>
 
         {loading ? (
@@ -110,88 +126,23 @@ const Index = () => {
             {courses.map((course) => (
               <Card 
                 key={course.id}
-                className="group cursor-pointer transition-all duration-500 hover:scale-105 hover:shadow-glow bg-gradient-card border-border/50 overflow-hidden relative"
+                className="group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-glow bg-transparent border-border/30 overflow-hidden p-0 flex justify-center items-center mx-auto"
+                style={{ width: '300px', height: '500px' }}
                 onClick={() => navigate(`/courses/${course.id}`)}
               >
-                {/* Glow effect on hover */}
-                <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-lg"></div>
-                
-                <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/50">
+                <div className="relative w-full h-full flex items-center justify-center">
                   {course.cover_image_url ? (
                     <img
                       src={course.cover_image_url}
                       alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-accent/10">
                       <BookOpen className="w-12 h-12 text-primary/50" />
                     </div>
                   )}
-                  
-                  {/* Floating badges */}
-                  <div className="absolute bottom-3 left-3">
-                    <Badge variant="secondary" className="text-xs bg-card/90 backdrop-blur-sm">
-                      {course.difficulty_level}
-                    </Badge>
-                  </div>
-                  
-                  {course.is_featured && (
-                    <div className="absolute top-3 left-3">
-                      <Badge className="text-xs bg-gradient-primary text-primary-foreground animate-pulse">
-                        <Star className="w-3 h-3 mr-1" />
-                        Destaque
-                      </Badge>
-                    </div>
-                  )}
-                  
-                  <div className="absolute top-3 right-3">
-                    <Play className="w-8 h-8 text-white/80 opacity-0 group-hover:opacity-100 transition-all duration-300 drop-shadow-lg" />
-                  </div>
-                  
-                  {/* Elegant overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
-                
-                <CardHeader className="pb-3 relative z-10">
-                  <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors duration-300">
-                    {course.title}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2 text-muted-foreground">
-                    {course.description}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="pt-0 relative z-10">
-                  {course.instructor_name && (
-                    <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-                      <div className="w-7 h-7 bg-gradient-primary rounded-full flex items-center justify-center shadow-sm">
-                        <span className="text-xs font-medium text-primary-foreground">
-                          {course.instructor_name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <span>Por {course.instructor_name}</span>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4 text-primary/70" />
-                      <span>{course.duration_hours}h de conteúdo</span>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    className="w-full group-hover:shadow-glow transition-all duration-300"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate('/auth');
-                    }}
-                  >
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Começar Agora
-                  </Button>
-                </CardContent>
               </Card>
             ))}
           </div>
