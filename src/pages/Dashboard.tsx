@@ -92,7 +92,7 @@ const Dashboard = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative h-96 overflow-hidden">
+      <section className="relative h-[500px] overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -100,7 +100,7 @@ const Dashboard = () => {
           }}
         />
         
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-50/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 to-transparent" />
         
         <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
           <div className="max-w-2xl">
@@ -116,48 +116,103 @@ const Dashboard = () => {
       </section>
 
       {/* Continue Progress Section - Horizontal */}
-      <section className="container mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-gray-900">Continuar progresso</h3>
-          <div className="flex space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full bg-white shadow-sm hover:shadow-md"
-              onClick={() => scrollCarousel('left')}
+      <section className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 py-16">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-3xl font-bold text-white">Continuar progresso</h3>
+            <div className="flex space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                onClick={() => scrollCarousel('left')}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20"
+                onClick={() => scrollCarousel('right')}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div 
+              id="progress-carousel"
+              className="flex space-x-8 overflow-x-auto scrollbar-hide pb-6"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="rounded-full bg-white shadow-sm hover:shadow-md"
-              onClick={() => scrollCarousel('right')}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+              {coursesLoading ? (
+                <div className="flex items-center justify-center w-full py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-white" />
+                </div>
+              ) : (
+                enrolledCourses.map((course) => (
+                  <div 
+                    key={course.id} 
+                    className="flex-shrink-0 w-[280px] cursor-pointer transition-all duration-300 hover:scale-105"
+                    onClick={() => navigate(`/course/${course.id}`)}
+                  >
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden border border-white/20">
+                      <div className="relative aspect-[708/1494] bg-gradient-to-br from-gray-700 to-gray-900">
+                        {course.cover_image_url ? (
+                          <img
+                            src={course.cover_image_url}
+                            alt={course.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center">
+                            <Play className="w-12 h-12 text-white/70" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <Badge variant="secondary" className="bg-white/20 text-white border-0 text-xs mb-2">
+                            {course.difficulty_level}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-semibold text-white mb-1 line-clamp-2 text-sm">
+                          {course.title}
+                        </h4>
+                        <p className="text-xs text-white/70">
+                          Por {course.instructor_name || 'Gustavo Medeiros'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="relative">
-          <div 
-            id="progress-carousel"
-            className="flex space-x-4 overflow-x-auto scrollbar-hide pb-4"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
+      {/* All Courses Section - Grid */}
+      <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
+        <div className="container mx-auto px-6">
+          <h3 className="text-3xl font-bold text-gray-900 mb-8">Todos os Cursos</h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
             {coursesLoading ? (
-              <div className="flex items-center justify-center w-full py-12">
+              <div className="col-span-full flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : (
-              enrolledCourses.map((course) => (
+              courses?.map((course) => (
                 <div 
-                  key={course.id} 
-                  className="flex-shrink-0 w-80 cursor-pointer transition-all duration-300 hover:scale-105"
+                  key={course.id}
+                  className="cursor-pointer transition-all duration-300 hover:scale-105 group"
                   onClick={() => navigate(`/course/${course.id}`)}
                 >
                   <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                    <div className="relative aspect-[16/9] bg-gradient-to-br from-gray-100 to-gray-200">
+                    <div className="relative aspect-[708/1494] bg-gradient-to-br from-gray-100 to-gray-200">
                       {course.cover_image_url ? (
                         <img
                           src={course.cover_image_url}
@@ -166,80 +221,29 @@ const Dashboard = () => {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
-                          <Play className="w-12 h-12 text-primary/50" />
+                          <Play className="w-8 h-8 text-primary/50" />
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                        {course.title}
-                      </h4>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">
-                          Por {course.instructor_name || 'Gustavo Medeiros'}
-                        </span>
-                        <Badge variant="secondary" className="text-xs">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <Badge variant="secondary" className="bg-white/90 text-gray-900 text-xs">
                           {course.difficulty_level}
                         </Badge>
                       </div>
+                    </div>
+                    <div className="p-3">
+                      <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-xs">
+                        {course.title}
+                      </h4>
+                      <p className="text-xs text-gray-600">
+                        {course.instructor_name || 'Gustavo Medeiros'}
+                      </p>
                     </div>
                   </div>
                 </div>
               ))
             )}
           </div>
-        </div>
-      </section>
-
-      {/* All Courses Section - Grid */}
-      <section className="container mx-auto px-6 pb-12">
-        <h3 className="text-2xl font-bold text-gray-900 mb-6">Todos os Cursos</h3>
-        
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {coursesLoading ? (
-            <div className="col-span-full flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : (
-            courses?.map((course) => (
-              <div 
-                key={course.id}
-                className="cursor-pointer transition-all duration-300 hover:scale-105 group"
-                onClick={() => navigate(`/course/${course.id}`)}
-              >
-                <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                  <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-100 to-gray-200">
-                    {course.cover_image_url ? (
-                      <img
-                        src={course.cover_image_url}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center">
-                        <Play className="w-8 h-8 text-primary/50" />
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Badge variant="secondary" className="bg-white/90 text-gray-900 text-xs">
-                        {course.difficulty_level}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2 text-sm">
-                      {course.title}
-                    </h4>
-                    <p className="text-xs text-gray-600">
-                      {course.duration_hours}h • {course.instructor_name || 'Gustavo Medeiros'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
         </div>
       </section>
     </div>
