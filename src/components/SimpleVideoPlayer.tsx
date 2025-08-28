@@ -36,14 +36,32 @@ const SimpleVideoPlayer = ({
   const [isLoading, setIsLoading] = useState(true);
   const [ytPlayer, setYtPlayer] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [extractedVideoId, setExternalVideoId] = useState<string | null>(externalVideoId);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<HTMLDivElement>(null);
   const progressInterval = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    if (videoType === 'youtube' && externalVideoId) {
-      loadYouTubePlayer();
+    console.log('Video info:', { videoType, externalVideoId, videoUrl });
+    
+    if (videoType === 'youtube') {
+      if (externalVideoId) {
+        loadYouTubePlayer();
+      } else if (videoUrl) {
+        // Extract YouTube ID from URL
+        const extractedId = extractYouTubeId(videoUrl);
+        if (extractedId) {
+          setExternalVideoId(extractedId);
+          loadYouTubePlayer();
+        } else {
+          setError('ID do vídeo do YouTube inválido');
+          setIsLoading(false);
+        }
+      } else {
+        setError('URL ou ID do YouTube não fornecido');
+        setIsLoading(false);
+      }
     } else if (videoType === 'upload' && videoUrl) {
       setIsLoading(false);
     } else {
@@ -57,6 +75,12 @@ const SimpleVideoPlayer = ({
       }
     };
   }, [videoType, externalVideoId, videoUrl]);
+
+  const extractYouTubeId = (url: string): string | null => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : null;
+  };
 
   const loadYouTubePlayer = async () => {
     try {
@@ -96,7 +120,7 @@ const SimpleVideoPlayer = ({
       const player = new window.YT.Player(playerRef.current, {
         height: '100%',
         width: '100%',
-        videoId: externalVideoId,
+        videoId: extractedVideoId || externalVideoId,
         playerVars: {
           modestbranding: 1,
           rel: 0,

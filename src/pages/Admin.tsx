@@ -22,6 +22,7 @@ import DashboardSettings from '@/components/admin/DashboardSettings';
 
 // Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
+import FixYouTubeLessons from '@/components/admin/FixYouTubeLessons';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -226,7 +227,10 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="testing">
-            <AdminTesting />
+            <div className="space-y-6">
+              <AdminTesting />
+              <FixYouTubeLessons />
+            </div>
           </TabsContent>
 
           <TabsContent value="settings">

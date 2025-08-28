@@ -162,14 +162,44 @@ export const useCourseLessons = (courseId: string) => {
 
   const fetchYouTubeInfo = async (youtubeUrl: string) => {
     try {
+      // Extract video ID from URL
+      const extractYouTubeId = (url: string): string | null => {
+        const patterns = [
+          /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+          /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+        ];
+        
+        for (const pattern of patterns) {
+          const match = url.match(pattern);
+          if (match && match[1]) {
+            return match[1];
+          }
+        }
+        return null;
+      };
+
+      const videoId = extractYouTubeId(youtubeUrl);
+      if (!videoId) {
+        throw new Error('ID do vídeo do YouTube não pôde ser extraído da URL');
+      }
+
       const { data, error } = await supabase.functions.invoke('youtube-video-info', {
         body: { url: youtubeUrl }
       });
 
       if (error) throw error;
-      return data;
-    } catch (err) {
-      throw new Error('Erro ao buscar informações do YouTube');
+      
+      // Return in the expected format for lesson creation
+      return {
+        id: videoId,
+        title: data.title || 'Título do YouTube',
+        description: data.description || '',
+        duration: data.duration || 0,
+        thumbnail: data.thumbnail || ''
+      };
+    } catch (err: any) {
+      console.error('YouTube API Error:', err);
+      throw new Error(err.message || 'Erro ao buscar informações do YouTube');
     }
   };
 
