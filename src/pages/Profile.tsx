@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, User, Lock, Save } from 'lucide-react';
+import { ArrowLeft, User, Lock, Save, Phone } from 'lucide-react';
 
 const Profile = () => {
   const { user, loading: authLoading } = useAuth();
@@ -19,7 +19,8 @@ const Profile = () => {
   const [profile, setProfile] = useState({
     full_name: '',
     bio: '',
-    avatar_url: ''
+    avatar_url: '',
+    whatsapp: ''
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -51,7 +52,8 @@ const Profile = () => {
         setProfile({
           full_name: data.full_name || '',
           bio: data.bio || '',
-          avatar_url: data.avatar_url || ''
+          avatar_url: data.avatar_url || '',
+          whatsapp: data.whatsapp || ''
         });
       }
     } catch (error: any) {
@@ -71,6 +73,7 @@ const Profile = () => {
           full_name: profile.full_name,
           bio: profile.bio,
           avatar_url: profile.avatar_url,
+          whatsapp: profile.whatsapp,
           email: user?.email
         }, { onConflict: 'id' });
 
@@ -294,6 +297,37 @@ const Profile = () => {
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     Máximo 500 caracteres
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="whatsapp">WhatsApp</Label>
+                  <Input
+                    id="whatsapp"
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    value={profile.whatsapp}
+                    onChange={(e) => {
+                      // Formatação do telefone
+                      let value = e.target.value.replace(/\D/g, '');
+                      if (value.length > 11) value = value.substring(0, 11);
+                      
+                      // Formatação: (00) 00000-0000
+                      if (value.length > 10) {
+                        value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                      } else if (value.length > 5) {
+                        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                      } else if (value.length > 2) {
+                        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                      } else if (value.length > 0) {
+                        value = value.replace(/^(\d*)/, '($1');
+                      }
+                      
+                      setProfile(prev => ({ ...prev, whatsapp: value }));
+                    }}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Seu número de WhatsApp para contato
                   </p>
                 </div>
 

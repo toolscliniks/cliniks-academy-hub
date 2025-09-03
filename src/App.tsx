@@ -74,8 +74,12 @@ const App = () => {
                   <Admin />
                 </ProtectedRoute>
               } />
-              <Route path="/lesson/:lessonId" element={<Lesson />} />
               <Route path="/courses/:courseId" element={<CourseDetail />} />
+              <Route path="/courses/:courseId/lessons/:lessonId" element={
+                <ProtectedRoute>
+                  <Lesson />
+                </ProtectedRoute>
+              } />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

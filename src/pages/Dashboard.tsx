@@ -27,6 +27,8 @@ interface IncompleteLessonWithCourse {
   description?: string;
   video_url?: string;
   duration_minutes?: number;
+  progress?: number;
+  last_accessed?: string;
   course: {
     id: string;
     title: string;
@@ -82,69 +84,48 @@ const Dashboard = () => {
     if (!user) return;
     
     try {
-      // First try to get custom featured courses from settings
-      const { data: settingsData } = await supabase
-        .from('site_settings')
-        .select('setting_value')
-        .eq('setting_key', 'homepage_featured_courses')
-        .single();
-
-      let lessonsQuery = supabase
-        .from('lessons')
-        .select(`
-          id,
-          title,
-          description,
-          video_url,
-          duration_minutes,
-          module_id,
-          modules!inner (
-            title,
-            course_id,
-            courses!inner (
-              id,
-              title,
-              instructor_name,
-              cover_image_url,
-              is_published
-            )
-          )
-        `)
-        .eq('modules.courses.is_published', true);
-
-      // If there are featured courses settings, filter by them
-      if (settingsData?.setting_value) {
-        const featuredCourses = settingsData.setting_value as any[];
-        const featuredCourseIds = featuredCourses
-          .filter(fc => fc.is_featured_on_homepage)
-          .map(fc => fc.course_id);
-        
-        if (featuredCourseIds.length > 0) {
-          lessonsQuery = lessonsQuery.in('modules.courses.id', featuredCourseIds);
-        }
-      }
-
-      const { data: lessonsData, error } = await lessonsQuery.limit(20);
+      // Busca as aulas não concluídas pelo usuário
+      // @ts-ignore - Necessário para contornar a falha na geração de tipos do Supabase local
+      const { data: incompleteLessonsData, error } = await supabase.rpc('get_incomplete_lessons', {
+          p_user_id: user.id,
+          p_limit: 20
+        });
 
       if (error) throw error;
 
-      const transformedLessons: IncompleteLessonWithCourse[] = lessonsData?.map(lesson => ({
-        id: lesson.id,
-        title: lesson.title,
-        description: lesson.description,
-        video_url: lesson.modules.courses.cover_image_url,
+      if (error) {
+        console.error('Erro ao buscar aulas incompletas:', error);
+        throw error;
+      }
+
+      // Garante que os dados sejam um array antes de mapear
+      const lessonsData = Array.isArray(incompleteLessonsData) ? incompleteLessonsData : [];
+      const transformedLessons: IncompleteLessonWithCourse[] = lessonsData.map((lesson: any) => ({
+        id: lesson.lesson_id,
+        title: lesson.lesson_title,
+        description: lesson.lesson_description,
+        video_url: lesson.cover_image_url,
         duration_minutes: lesson.duration_minutes,
         course: {
-          id: lesson.modules.courses.id,
-          title: lesson.modules.courses.title,
-          instructor_name: lesson.modules.courses.instructor_name,
+          id: lesson.course_id,
+          title: lesson.course_title,
+          instructor_name: lesson.instructor_name,
         },
         module: {
-          title: lesson.modules.title,
+          title: lesson.module_title,
         },
+        last_accessed: lesson.last_accessed,
+        progress: lesson.progress || 0
       })) || [];
 
-      setIncompleteLessons(transformedLessons);
+      // Ordena as aulas por data de acesso (mais recentes primeiro)
+      const sortedLessons = [...transformedLessons].sort((a, b) => {
+        const dateA = a.last_accessed ? new Date(a.last_accessed).getTime() : 0;
+        const dateB = b.last_accessed ? new Date(b.last_accessed).getTime() : 0;
+        return dateB - dateA;
+      });
+
+      setIncompleteLessons(sortedLessons);
     } catch (error) {
       console.error('Error fetching incomplete lessons:', error);
     }
@@ -297,7 +278,10 @@ const Dashboard = () => {
                       
                       {/* Progress Bar */}
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-zinc-700/50">
-                        <div className="h-full bg-primary transition-all duration-300" style={{ width: '35%' }} />
+                        <div 
+                          className="h-full bg-primary transition-all duration-300" 
+                          style={{ width: `${(lesson.progress || 0) * 100}%` }} 
+                        />
                       </div>
 
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">

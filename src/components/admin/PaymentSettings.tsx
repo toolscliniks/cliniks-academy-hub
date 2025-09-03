@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -15,9 +16,49 @@ const PaymentSettings = () => {
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
     payment_mode: 'direct',
+    asaas_api_key: '',
+    asaas_environment: 'sandbox',
     n8n_webhook_url: '',
-    asaas_enabled: true
   });
+
+  const testN8nWebhook = async () => {
+    if (!settings.n8n_webhook_url) {
+      toast.error('URL do webhook n8n não configurada');
+      return;
+    }
+
+    try {
+      const testData = {
+        event: 'test_webhook',
+        user_id: 'test_user_123',
+        user_email: 'teste@exemplo.com',
+        user_name: 'Usuário de Teste',
+        plan_id: 'plano_teste',
+        course_id: 'curso_teste',
+        billing_type: 'teste',
+        timestamp: new Date().toISOString(),
+        message: 'Este é um teste de webhook do n8n'
+      };
+
+      const response = await fetch(settings.n8n_webhook_url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(testData),
+      });
+
+      if (response.ok) {
+        toast.success('Webhook testado com sucesso!');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Erro ao testar webhook');
+      }
+    } catch (error) {
+      console.error('Erro ao testar webhook:', error);
+      toast.error(`Falha ao testar webhook: ${error.message}`);
+    }
+  };
 
   useEffect(() => {
     fetchSettings();
@@ -179,6 +220,16 @@ const PaymentSettings = () => {
               <p className="text-xs text-muted-foreground">
                 URL do webhook n8n que receberá os dados de pagamento
               </p>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={testN8nWebhook}
+                disabled={!settings.n8n_webhook_url || settings.payment_mode === 'direct'}
+              >
+                Testar Webhook
+              </Button>
             </div>
 
             {settings.payment_mode === 'n8n' && (

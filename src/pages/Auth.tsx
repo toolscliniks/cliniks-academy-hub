@@ -17,6 +17,7 @@ const Auth = () => {
     email: '',
     password: '',
     fullName: '',
+    whatsapp: '',
     confirmPassword: ''
   });
 
@@ -63,7 +64,8 @@ const Auth = () => {
           options: {
             emailRedirectTo: redirectUrl,
             data: {
-              full_name: formData.fullName
+              full_name: formData.fullName,
+              whatsapp: formData.whatsapp
             }
           }
         });
@@ -127,17 +129,51 @@ const Auth = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Nome completo</Label>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="Seu nome completo"
-                  value={formData.fullName}
-                  onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  required={!isLogin}
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Nome completo</Label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    placeholder="Seu nome completo"
+                    value={formData.fullName}
+                    onChange={(e) => handleInputChange('fullName', e.target.value)}
+                    required={!isLogin}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp">WhatsApp (com DDD)</Label>
+                  <Input
+                    id="whatsapp"
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    value={formData.whatsapp}
+                    onChange={(e) => {
+                      // Formatação do telefone
+                      let value = e.target.value.replace(/\D/g, '');
+                      if (value.length > 11) value = value.substring(0, 11);
+                      
+                      // Formatação: (00) 00000-0000
+                      if (value.length > 10) {
+                        value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                      } else if (value.length > 5) {
+                        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                      } else if (value.length > 2) {
+                        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+                      } else if (value.length > 0) {
+                        value = value.replace(/^(\d*)/, '($1');
+                      }
+                      
+                      handleInputChange('whatsapp', value);
+                    }}
+                    required={!isLogin}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Enviaremos atualizações importantes por este número
+                  </p>
+                </div>
+              </>
             )}
 
             <div className="space-y-2">

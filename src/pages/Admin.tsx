@@ -23,6 +23,7 @@ import DashboardSettings from '@/components/admin/DashboardSettings';
 // Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
 import FixYouTubeLessons from '@/components/admin/FixYouTubeLessons';
+import VideoPlayerTesting from '@/components/admin/VideoPlayerTesting';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -175,6 +176,7 @@ const Admin = () => {
             <TabsTrigger value="payments" className="text-xs lg:text-sm hidden lg:flex">Pagamentos</TabsTrigger>
             <TabsTrigger value="notifications" className="text-xs lg:text-sm hidden lg:flex">Notificações</TabsTrigger>
             <TabsTrigger value="testing" className="text-xs lg:text-sm hidden lg:flex">Testes</TabsTrigger>
+            <TabsTrigger value="video-testing" className="text-xs lg:text-sm hidden lg:flex">Players de Vídeo</TabsTrigger>
             <TabsTrigger value="settings" className="text-xs lg:text-sm">Config</TabsTrigger>
           </TabsList>
           
@@ -231,6 +233,10 @@ const Admin = () => {
               <AdminTesting />
               <FixYouTubeLessons />
             </div>
+          </TabsContent>
+
+          <TabsContent value="video-testing">
+            <VideoPlayerTesting />
           </TabsContent>
 
           <TabsContent value="settings">

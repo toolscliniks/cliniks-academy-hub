@@ -103,9 +103,31 @@ serve(async (req) => {
       throw new Error("planId ou courseId deve ser fornecido");
     }
 
-    // Asaas API configuration
-    const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY");
-    const ASAAS_BASE_URL = "https://www.asaas.com/api/v3";
+    // Get Asaas API configuration from database
+    const { data: asaasKeySetting } = await supabaseClient
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'asaas_api_key')
+      .single();
+
+    const { data: asaasEnvSetting } = await supabaseClient
+      .from('site_settings')
+      .select('setting_value')
+      .eq('setting_key', 'asaas_environment')
+      .single();
+
+    const ASAAS_API_KEY = asaasKeySetting?.setting_value;
+    const ASAAS_ENVIRONMENT = asaasEnvSetting?.setting_value || 'sandbox';
+    const ASAAS_BASE_URL = ASAAS_ENVIRONMENT === 'production' 
+      ? "https://www.asaas.com/api/v3" 
+      : "https://sandbox.asaas.com/api/v3";
+
+    if (!ASAAS_API_KEY) {
+      throw new Error('Chave da API do Asaas não configurada');
+    }
+
+    console.log('Using Asaas environment:', ASAAS_ENVIRONMENT);
+    console.log('Asaas API Key configured:', !!ASAAS_API_KEY);
 
     // Check if customer exists in Asaas
     let customerId = null;
