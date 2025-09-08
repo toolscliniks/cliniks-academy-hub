@@ -70,13 +70,17 @@ const Plans = () => {
 
       if (error) throw error;
 
-      if (data.invoiceUrl) {
-        window.open(data.invoiceUrl, '_blank');
-        toast({
-          title: "Pagamento criado!",
-          description: "Você será redirecionado para finalizar o pagamento."
-        });
-      }
+      // Show success message about payment email
+      toast({
+        title: "Solicitação de Assinatura Enviada!",
+        description: "Você receberá um email em breve com as instruções de pagamento. Verifique sua caixa de entrada e spam.",
+        duration: 8000
+      });
+      
+      // Redirect to dashboard after showing the message
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
 
     } catch (error: any) {
       toast({

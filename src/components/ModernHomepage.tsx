@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, BookOpen, Users, Award, Clock, Star, ArrowRight, Sparkles, Zap, Heart, Shield } from "lucide-react";
+import { Play, BookOpen, Users, Award, Clock, Star, ArrowRight, Sparkles, Zap, Heart, Shield, Phone, Mail, MessageCircle, Instagram, Linkedin, Youtube } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFeaturedCourses } from "@/hooks/useFeaturedCourses";
 import { Course } from "@/hooks/useCourses";
@@ -350,6 +350,142 @@ const ModernHomepage = () => {
           </Button>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="bg-background border-t border-border/50">
+        <div className="container mx-auto px-4 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Logo and Description */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-2 rounded-lg bg-primary-gradient">
+                  <BookOpen className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <span className="text-xl font-bold">
+                  Cliniks <span className="text-primary">Academy</span>
+                </span>
+              </div>
+              <p className="text-muted-foreground mb-6 max-w-md">
+                Transformando carreiras através da educação especializada. 
+                Oferecemos cursos premium com metodologia inovadora e suporte completo.
+              </p>
+              <div className="flex items-center gap-4">
+                <a 
+                  href="https://wa.me/5511999999999" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors group"
+                >
+                  <MessageCircle className="w-4 h-4 group-hover:animate-pulse" />
+                  WhatsApp
+                </a>
+                <div className="flex items-center gap-3">
+                  <a 
+                    href="https://instagram.com/cliniks.academy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    <Instagram className="w-5 h-5" />
+                  </a>
+                  <a 
+                    href="https://linkedin.com/company/cliniks-academy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                  </a>
+                  <a 
+                    href="https://youtube.com/@cliniks.academy" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    <Youtube className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h3 className="font-semibold mb-4">Links Rápidos</h3>
+              <ul className="space-y-2">
+                <li>
+                  <button 
+                    onClick={() => navigate('/auth')}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Criar Conta
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => navigate('/auth')}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Fazer Login
+                  </button>
+                </li>
+                <li>
+                  <a 
+                    href="#sobre" 
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Sobre Nós
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="#termos" 
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Termos de Uso
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div>
+              <h3 className="font-semibold mb-4">Contato</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Phone className="w-4 h-4" />
+                  <span>(11) 99999-9999</span>
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <Mail className="w-4 h-4" />
+                  <span>contato@cliniks.academy</span>
+                </li>
+                <li className="flex items-center gap-2 text-muted-foreground">
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Suporte 24/7</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="border-t border-border/50 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-muted-foreground text-sm">
+              © 2024 Cliniks Academy. Todos os direitos reservados.
+            </p>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <a href="#privacidade" className="hover:text-primary transition-colors">
+                Política de Privacidade
+              </a>
+              <a href="#termos" className="hover:text-primary transition-colors">
+                Termos de Serviço
+              </a>
+              <a href="#cookies" className="hover:text-primary transition-colors">
+                Cookies
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

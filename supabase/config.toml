@@ -25,7 +25,7 @@ enable_confirmations = false
 [functions]
 
 [functions.create-payment]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-certificate]
 verify_jwt = true

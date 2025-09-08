@@ -20,7 +20,8 @@ const Profile = () => {
     full_name: '',
     bio: '',
     avatar_url: '',
-    whatsapp: ''
+    whatsapp: '',
+    cpf_cnpj: ''
   });
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -53,7 +54,8 @@ const Profile = () => {
           full_name: data.full_name || '',
           bio: data.bio || '',
           avatar_url: data.avatar_url || '',
-          whatsapp: data.whatsapp || ''
+          whatsapp: data.whatsapp || '',
+          cpf_cnpj: data.cpf_cnpj || ''
         });
       }
     } catch (error: any) {
@@ -68,14 +70,13 @@ const Profile = () => {
     try {
       const { error } = await supabase
         .from('profiles')
-        .upsert({
-          id: user?.id,
+        .update({
           full_name: profile.full_name,
           bio: profile.bio,
-          avatar_url: profile.avatar_url,
           whatsapp: profile.whatsapp,
-          email: user?.email
-        }, { onConflict: 'id' });
+          cpf_cnpj: profile.cpf_cnpj
+        })
+        .eq('id', user?.id);
 
       if (error) throw error;
 
@@ -118,11 +119,22 @@ const Profile = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      // First, verify the current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: passwordData.currentPassword
+      });
+
+      if (signInError) {
+        throw new Error('Sua senha atual está incorreta.');
+      }
+
+      // If current password is correct, update to the new password
+      const { error: updateError } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       });
 
-      if (error) throw error;
+      if (updateError) throw updateError;
 
       setPasswordData({
         currentPassword: '',
@@ -208,181 +220,147 @@ const Profile = () => {
       </header>
 
       <div className="container mx-auto px-6 py-8 max-w-4xl">
-        <div className="grid gap-6">
-          {/* Avatar Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                URL da Imagem
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profile.avatar_url} />
-                  <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                    {profile.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                  </AvatarFallback>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Coluna do Avatar */}
+          <div className="md:col-span-1 space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Foto de Perfil</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center space-y-4">
+                <Avatar className="w-32 h-32">
+                  <AvatarImage src={profile.avatar_url} alt="User avatar" />
+                  <AvatarFallback>{profile.full_name?.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <Input
-                    placeholder="https://exemplo.com/foto.jpg"
-                    value={profile.avatar_url}
-                    onChange={(e) => setProfile(prev => ({ ...prev, avatar_url: e.target.value }))}
-                  />
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Cole o link de uma imagem ou deixe em branco para usar as iniciais
-                  </p>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="avatar-upload">Ou faça upload de uma imagem</Label>
                 <Input
-                  id="avatar-upload"
+                  id="picture"
                   type="file"
-                  accept="image/*"
                   onChange={handleImageUpload}
-                  className="mt-1"
+                  className="text-sm"
                 />
-              </div>
-            </CardContent>
-          </Card>
+                <Input
+                  placeholder="Ou cole a URL da imagem"
+                  value={profile.avatar_url}
+                  onChange={(e) =>
+                    setProfile((prev) => ({ ...prev, avatar_url: e.target.value }))
+                  }
+                />
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Personal Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Informações Pessoais
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Atualize seus dados básicos
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleUpdateProfile} className="space-y-4">
-                <div>
-                  <Label htmlFor="fullName">Nome completo</Label>
-                  <Input
-                    id="fullName"
-                    value={profile.full_name}
-                    onChange={(e) => setProfile(prev => ({ ...prev, full_name: e.target.value }))}
-                    placeholder="Gile Maeda"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    value={user?.email || ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    O email não pode ser alterado por questões de segurança
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="bio">Biografia</Label>
-                  <Textarea
-                    id="bio"
-                    value={profile.bio}
-                    onChange={(e) => setProfile(prev => ({ ...prev, bio: e.target.value }))}
-                    placeholder="Conte um pouco sobre você..."
-                    rows={4}
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Máximo 500 caracteres
-                  </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="whatsapp">WhatsApp</Label>
-                  <Input
-                    id="whatsapp"
-                    type="tel"
-                    placeholder="(00) 00000-0000"
-                    value={profile.whatsapp}
-                    onChange={(e) => {
-                      // Formatação do telefone
-                      let value = e.target.value.replace(/\D/g, '');
-                      if (value.length > 11) value = value.substring(0, 11);
-                      
-                      // Formatação: (00) 00000-0000
-                      if (value.length > 10) {
-                        value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-                      } else if (value.length > 5) {
-                        value = value.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
-                      } else if (value.length > 2) {
-                        value = value.replace(/(\d{2})(\d{0,5})/, '($1) $2');
-                      } else if (value.length > 0) {
-                        value = value.replace(/^(\d*)/, '($1');
+          {/* Coluna dos Formulários */}
+          <div className="md:col-span-2 space-y-8">
+            {/* Formulário de Dados Pessoais */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados Pessoais</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="fullName">Nome Completo</Label>
+                    <Input
+                      id="fullName"
+                      value={profile.full_name}
+                      onChange={(e) =>
+                        setProfile({ ...profile, full_name: e.target.value })
                       }
-                      
-                      setProfile(prev => ({ ...prev, whatsapp: value }));
-                    }}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Seu número de WhatsApp para contato
-                  </p>
-                </div>
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="bio">Bio</Label>
+                    <Textarea
+                      id="bio"
+                      value={profile.bio}
+                      onChange={(e) =>
+                        setProfile({ ...profile, bio: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="whatsapp">WhatsApp</Label>
+                    <Input
+                      id="whatsapp"
+                      value={profile.whatsapp}
+                      onChange={(e) =>
+                        setProfile({ ...profile, whatsapp: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="cpf_cnpj">CPF/CNPJ</Label>
+                    <Input
+                      id="cpf_cnpj"
+                      value={profile.cpf_cnpj}
+                      onChange={(e) =>
+                        setProfile({ ...profile, cpf_cnpj: e.target.value })
+                      }
+                    />
+                  </div>
+                  <Button type="submit" disabled={loading}>
+                    <Save className="mr-2 h-4 w-4" /> Salvar Alterações
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
-                <Button type="submit" disabled={loading} className="w-full">
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Password Change */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5" />
-                Alterar Senha
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Mantenha sua conta segura
-              </p>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleUpdatePassword} className="space-y-4">
-                <div>
-                  <Label htmlFor="newPassword">Nova senha</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                    placeholder="Digite sua nova senha"
-                    minLength={6}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                    placeholder="Confirme sua nova senha"
-                    minLength={6}
-                  />
-                </div>
-
-                <Button type="submit" disabled={loading} className="w-full">
-                  <Lock className="h-4 w-4 mr-2" />
-                  {loading ? 'Alterando...' : 'Alterar Senha'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+            {/* Formulário de Alteração de Senha */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Alterar Senha</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="currentPassword">Senha Atual</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          currentPassword: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="newPassword">Nova Senha</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <Button type="submit" variant="destructive" disabled={loading}>
+                    <Lock className="mr-2 h-4 w-4" /> Alterar Senha
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

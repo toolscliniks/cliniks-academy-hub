@@ -192,6 +192,23 @@ const PaymentSuccess = () => {
               </CardHeader>
               
               <CardContent className="space-y-6">
+                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-white text-xs font-bold">!</span>
+                    </div>
+                    <div className="text-sm">
+                      <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                        Verifique seu email
+                      </p>
+                      <p className="text-blue-700 dark:text-blue-300">
+                        Enviamos as instruções de pagamento para <strong>{user?.email}</strong>. 
+                        Verifique sua caixa de entrada e também a pasta de spam.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="text-center">
                   <p className="text-muted-foreground mb-4">
                     Assim que o pagamento for confirmado, você receberá acesso imediato ao curso.

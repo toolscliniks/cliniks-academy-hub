@@ -278,8 +278,8 @@ const UniversalSecurePlayer: React.FC<UniversalSecurePlayerProps> = ({
             onProgress(progress);
           }
           
-          // Mark as complete when 90% watched
-          if (progress >= 90 && !hasStarted) {
+          // Mark as complete when 95% watched (less than 1 minute remaining)
+          if (progress >= 95 && !hasStarted) {
             setHasStarted(true);
             if (onComplete) {
               onComplete();

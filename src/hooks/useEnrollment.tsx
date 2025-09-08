@@ -112,6 +112,62 @@ export const useEnrollment = (courseId?: string) => {
     }
   };
 
+  const updateCourseProgress = async () => {
+    if (!user || !courseId) return;
+
+    try {
+      // Get all lessons for this course
+      const { data: lessonsData, error: lessonsError } = await supabase
+        .from('lessons')
+        .select(`
+          id,
+          modules!inner (
+            course_id
+          )
+        `)
+        .eq('modules.course_id', courseId);
+
+      if (lessonsError) throw lessonsError;
+      
+      const lessonIds = lessonsData?.map(l => l.id) || [];
+      if (lessonIds.length === 0) return;
+
+      // Get completed lessons count
+      const { data: completedLessons, error: progressError } = await supabase
+        .from('lesson_progress')
+        .select('lesson_id')
+        .eq('user_id', user.id)
+        .eq('is_completed', true)
+        .in('lesson_id', lessonIds);
+
+      if (progressError) throw progressError;
+
+      // Calculate progress percentage
+      const completedCount = completedLessons?.length || 0;
+      const totalLessons = lessonIds.length;
+      const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+      
+      // Check if course is completed
+      const isCompleted = progressPercentage === 100;
+      const completedAt = isCompleted ? new Date().toISOString() : null;
+
+      // Update course enrollment progress
+      const { error: updateError } = await supabase
+        .from('course_enrollments')
+        .update({
+          progress: progressPercentage,
+          completed_at: completedAt
+        })
+        .eq('user_id', user.id)
+        .eq('course_id', courseId);
+
+      if (updateError) throw updateError;
+
+    } catch (error) {
+      console.error('Error updating course progress:', error);
+    }
+  };
+
   const markLessonComplete = async (lessonId: string) => {
     if (!user) return false;
 
@@ -126,6 +182,9 @@ export const useEnrollment = (courseId?: string) => {
         });
 
       if (error) throw error;
+
+      // Update course progress after marking lesson complete
+      await updateCourseProgress();
 
       toast({
         title: "Parabéns!",

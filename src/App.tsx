@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/components/AuthProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { useAdBlockErrorSuppression } from "@/hooks/useAdBlockErrorSuppression";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -20,10 +21,15 @@ import Lesson from "./pages/Lesson";
 import CourseDetail from "./pages/CourseDetail";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Certificates from "./pages/Certificates";
+import MyCourses from "./pages/MyCourses";
+import MySubscriptions from "./pages/MySubscriptions";
 
 const queryClient = new QueryClient();
 
 const App = () => {
+  // Aplicar supressão de erros de ads globalmente
+  useAdBlockErrorSuppression();
+
   // Register service worker for PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -47,8 +53,16 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/courses" element={<Courses />} />
-              <Route path="/plans" element={<Plans />} />
+              <Route path="/courses" element={
+                <ProtectedRoute>
+                  <Courses />
+                </ProtectedRoute>
+              } />
+              <Route path="/plans" element={
+                <ProtectedRoute>
+                  <Plans />
+                </ProtectedRoute>
+              } />
               <Route path="/invoices" element={
                 <ProtectedRoute>
                   <Invoices />
@@ -74,7 +88,11 @@ const App = () => {
                   <Admin />
                 </ProtectedRoute>
               } />
-              <Route path="/courses/:courseId" element={<CourseDetail />} />
+              <Route path="/courses/:courseId" element={
+                <ProtectedRoute>
+                  <CourseDetail />
+                </ProtectedRoute>
+              } />
               <Route path="/courses/:courseId/lessons/:lessonId" element={
                 <ProtectedRoute>
                   <Lesson />
@@ -82,6 +100,16 @@ const App = () => {
               } />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+              <Route path="/my-courses" element={
+                <ProtectedRoute>
+                  <MyCourses />
+                </ProtectedRoute>
+              } />
+              <Route path="/my-subscriptions" element={
+                <ProtectedRoute>
+                  <MySubscriptions />
+                </ProtectedRoute>
+              } />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

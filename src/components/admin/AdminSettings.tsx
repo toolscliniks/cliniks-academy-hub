@@ -8,7 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Settings, Globe, Webhook, Mail, Palette, Shield } from 'lucide-react';
+import { Settings, Globe, Webhook, Mail, Palette, Shield, Code } from 'lucide-react';
+import DevelopmentTools from './DevelopmentTools';
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -63,12 +64,29 @@ const AdminSettings = () => {
 
   const updateSetting = async (key: string, value: any) => {
     try {
-      const { error } = await supabase
+      // Primeiro, verifica se a configuração já existe
+      const { data: existingSetting } = await supabase
         .from('site_settings')
-        .upsert({
-          setting_key: key,
-          setting_value: value
-        });
+        .select('id')
+        .eq('setting_key', key)
+        .single();
+
+      let error;
+      if (existingSetting) {
+        // Se existe, atualiza
+        ({ error } = await supabase
+          .from('site_settings')
+          .update({ setting_value: value })
+          .eq('setting_key', key));
+      } else {
+        // Se não existe, insere
+        ({ error } = await supabase
+          .from('site_settings')
+          .insert({
+            setting_key: key,
+            setting_value: value
+          }));
+      }
 
       if (error) throw error;
 
@@ -141,7 +159,7 @@ const AdminSettings = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general" className="flex items-center space-x-2">
             <Globe className="w-4 h-4" />
             <span>Geral</span>
@@ -157,6 +175,10 @@ const AdminSettings = () => {
           <TabsTrigger value="appearance" className="flex items-center space-x-2">
             <Palette className="w-4 h-4" />
             <span>Aparência</span>
+          </TabsTrigger>
+          <TabsTrigger value="development" className="flex items-center space-x-2">
+            <Code className="w-4 h-4" />
+            <span>Desenvolvimento</span>
           </TabsTrigger>
         </TabsList>
 
@@ -204,35 +226,123 @@ const AdminSettings = () => {
 
         <TabsContent value="webhooks">
           <div className="space-y-6">
+            {/* Webhook de Pagamento */}
             <Card className="bg-gradient-card border-border/50">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Webhook className="w-5 h-5" />
-                  <span>Configuração n8n</span>
+                  <span>Webhook de Pagamento</span>
                 </CardTitle>
-                <CardDescription>Configure a integração com n8n para automações</CardDescription>
+                <CardDescription>Configure o webhook para processar pagamentos de cursos e planos</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="n8n-url">URL do Webhook n8n</Label>
+                  <Label htmlFor="payment-webhook-url">URL do Webhook de Pagamento</Label>
                   <Input
-                    id="n8n-url"
-                    value={settings.n8n_webhook_url?.replace(/"/g, '') || ''}
-                    onChange={(e) => updateSetting('n8n_webhook_url', `"${e.target.value}"`)}
-                    placeholder="https://your-n8n-instance.com/webhook/cliniks-academy"
+                    id="payment-webhook-url"
+                    value={settings.payment_webhook_url?.replace(/"/g, '') || ''}
+                    onChange={(e) => updateSetting('payment_webhook_url', e.target.value)} 
+                    placeholder="https://n8n.clinicagestao.com.br/webhook/sucesso"
                   />
                 </div>
                 
                 <Button
-                  onClick={() => createWebhook({
-                    name: 'n8n Integration',
-                    webhook_url: settings.n8n_webhook_url?.replace(/"/g, '') || '',
-                    event_types: ['user_registered', 'payment_completed', 'course_completed'],
-                    is_active: true
-                  })}
-                  disabled={!settings.n8n_webhook_url || settings.n8n_webhook_url === '""'}
+                  onClick={async () => {
+                    try {
+                      const testData = {
+                        nome: "Teste Usuario",
+                        email: "teste@exemplo.com",
+                        whatsapp: "11999999999",
+                        cpf_cnpj: "123.456.789-00",
+                        id_curso: "test-course-123",
+                        forma_pagamento: "PIX"
+                      };
+                      
+                      // Use Supabase Edge Function to avoid CORS issues
+                      const { data, error } = await supabase.functions.invoke('n8n-webhook-handler', {
+                        body: {
+                          event_type: 'test_payment_webhook',
+                          webhook_url: settings.payment_webhook_url?.replace(/"/g, '') || '',
+                          data: testData,
+                          metadata: {
+                            test: true,
+                            source: 'admin_panel'
+                          }
+                        }
+                      });
+                      
+                      if (error) {
+                        throw new Error(error.message);
+                      }
+                      
+                      toast({ title: "Teste realizado!", description: "Webhook de pagamento funcionando corretamente." });
+                    } catch (error: any) {
+                      toast({ title: "Erro no teste", description: error.message, variant: "destructive" });
+                    }
+                  }}
+                  disabled={!settings.payment_webhook_url || settings.payment_webhook_url === '""'}
                 >
-                  Ativar Webhook n8n
+                  Testar Webhook de Pagamento
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Webhook de Cadastro */}
+            <Card className="bg-gradient-card border-border/50">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Webhook className="w-5 h-5" />
+                  <span>Webhook de Cadastro</span>
+                </CardTitle>
+                <CardDescription>Configure o webhook para processar cadastros de novos usuários</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="register-webhook-url">URL do Webhook de Cadastro</Label>
+                  <Input
+                    id="register-webhook-url"
+                    value={settings.register_webhook_url?.replace(/"/g, '') || ''}
+                    onChange={(e) => updateSetting('register_webhook_url', e.target.value)} 
+                    placeholder="https://n8n.clinicagestao.com.br/webhook/cadastroclinica"
+                  />
+                </div>
+                
+                <Button
+                  onClick={async () => {
+                    try {
+                      const testData = {
+                        nome: "Teste Usuario Cadastro",
+                        email: "cadastro@exemplo.com",
+                        whatsapp: "11888888888",
+                        cpf_cnpj: "987.654.321-00",
+                        source: "cliniks academy"
+                      };
+                      
+                      // Use Supabase Edge Function to avoid CORS issues
+                      const { data, error } = await supabase.functions.invoke('n8n-webhook-handler', {
+                        body: {
+                          event_type: 'test_register_webhook',
+                          webhook_url: settings.register_webhook_url?.replace(/"/g, '') || '',
+                          data: testData,
+                          metadata: {
+                            test: true,
+                            source: 'admin_panel'
+                          }
+                        }
+                      });
+                      
+                      if (error) {
+                        throw new Error(error.message);
+                      }
+                      
+                      toast({ title: "Teste realizado!", description: "Webhook de cadastro funcionando corretamente." });
+                    } catch (error: any) {
+                      toast({ title: "Erro no teste", description: error.message, variant: "destructive" });
+                    }
+                  }}
+                  disabled={!settings.register_webhook_url || settings.register_webhook_url === '""'}
+                >
+                  Testar Webhook de Cadastro
                 </Button>
               </CardContent>
             </Card>
@@ -377,6 +487,10 @@ const AdminSettings = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="development">
+          <DevelopmentTools />
         </TabsContent>
       </Tabs>
     </div>

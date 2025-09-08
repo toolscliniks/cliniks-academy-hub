@@ -18,6 +18,7 @@ const Auth = () => {
     password: '',
     fullName: '',
     whatsapp: '',
+    cpf_cnpj: '',
     confirmPassword: ''
   });
 
@@ -65,7 +66,8 @@ const Auth = () => {
             emailRedirectTo: redirectUrl,
             data: {
               full_name: formData.fullName,
-              whatsapp: formData.whatsapp
+              whatsapp: formData.whatsapp,
+              cpf_cnpj: formData.cpf_cnpj
             }
           }
         });
@@ -138,6 +140,18 @@ const Auth = () => {
                     placeholder="Seu nome completo"
                     value={formData.fullName}
                     onChange={(e) => handleInputChange('fullName', e.target.value)}
+                    required={!isLogin}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="cpf_cnpj">CPF ou CNPJ</Label>
+                  <Input
+                    id="cpf_cnpj"
+                    type="text"
+                    placeholder="Seu CPF ou CNPJ"
+                    value={formData.cpf_cnpj}
+                    onChange={(e) => handleInputChange('cpf_cnpj', e.target.value)}
                     required={!isLogin}
                   />
                 </div>

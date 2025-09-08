@@ -51,22 +51,39 @@ const CursoDetalhes = () => {
     if (!courseId) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('purchase-course', {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           type: 'course',
-          item_id: courseId,
-          billing_type: 'BOLETO'
+          courseId: courseId,
+          billingType: 'BOLETO'
         }
       });
 
       if (error) throw error;
 
-      if (data.payment_url) {
-        window.open(data.payment_url, '_blank');
+      if (data?.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
         toast({
           title: 'Redirecionando para pagamento',
           description: 'Você será redirecionado para completar o pagamento'
         });
+      } else if (data?.invoiceUrl) {
+        window.open(data.invoiceUrl, '_blank');
+        toast({
+          title: 'Pagamento criado!',
+          description: 'Você será redirecionado para finalizar o pagamento.'
+        });
+      } else if (data?.message) {
+        toast({
+          title: 'Solicitação de Compra Enviada!',
+          description: 'Você receberá um email em breve com as instruções de pagamento. Verifique sua caixa de entrada e spam.',
+          duration: 8000
+        });
+        
+        // Redirect to dashboard after showing the message
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
       }
     } catch (error: any) {
       toast({

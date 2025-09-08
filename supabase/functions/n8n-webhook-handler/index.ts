@@ -46,6 +46,23 @@ serve(async (req) => {
       source: 'cliniks-academy'
     };
 
+    // Prepare payload based on event type
+    let finalPayload;
+    
+    if (event_type === 'test_payment_webhook' || event_type === 'test_register_webhook') {
+      // For test webhooks, send data directly with test flag
+      finalPayload = {
+        ...data,
+        test: true,
+        event_type: event_type.replace('test_', ''),
+        timestamp: new Date().toISOString(),
+        source: 'cliniks-academy-test'
+      };
+    } else {
+      // For regular webhooks, use the original format
+      finalPayload = webhookPayload;
+    }
+
     // Send webhook to n8n
     const webhookResponse = await fetch(webhook_url, {
       method: 'POST',
@@ -53,7 +70,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
         'User-Agent': 'Cliniks-Academy-Webhook/1.0'
       },
-      body: JSON.stringify(webhookPayload)
+      body: JSON.stringify(finalPayload)
     });
 
     const responseText = await webhookResponse.text();
@@ -64,7 +81,7 @@ serve(async (req) => {
       .from('webhook_logs')
       .insert({
         webhook_url,
-        payload: webhookPayload,
+        payload: finalPayload,
         response_status: webhookResponse.status,
         response_body: responseText,
         event_type,
@@ -92,7 +109,8 @@ serve(async (req) => {
         message: "Webhook sent successfully",
         webhook_url,
         event_type,
-        response_status: webhookResponse.status
+        response_status: webhookResponse.status,
+        payload_sent: finalPayload
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

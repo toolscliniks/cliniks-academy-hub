@@ -3,27 +3,25 @@ import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, BookOpen, Users, Settings, BarChart3, TestTube, CreditCard, UserPlus, Bell, Monitor, DollarSign } from 'lucide-react';
+import { Plus, BookOpen, Users, Settings, BarChart3, TestTube, CreditCard, UserPlus, Bell, Monitor, DollarSign, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 import AdminCourses from '@/components/admin/AdminCourses';
 import LessonModuleManagement from '@/components/admin/LessonModuleManagement';
 import ImageManagement from '@/components/admin/ImageManagement';
-import AdminUsers from '@/components/admin/AdminUsers';
+import AdminCertificates from '@/components/admin/AdminCertificates';
 import AdminPlans from '@/components/admin/AdminPlans';
-import AdminAnalytics from '@/components/admin/AdminAnalytics';
-import AdminSettings from '@/components/admin/AdminSettings';
-import { UserMonitoring } from '@/components/admin/UserMonitoring';
-import ManualEnrollment from '@/components/admin/ManualEnrollment';
-import SubscriptionManagement from '@/components/admin/SubscriptionManagement';
-import NotificationManagement from '@/components/admin/NotificationManagement';
+import EnhancedUserManagement from '@/components/admin/EnhancedUserManagement';
+import ConsolidatedAnalytics from '@/components/admin/ConsolidatedAnalytics';
+import EnrollmentSubscriptionManager from '@/components/admin/EnrollmentSubscriptionManager';
 import PaymentSettings from '@/components/admin/PaymentSettings';
+import NotificationManagement from '@/components/admin/NotificationManagement';
+import AdminSettings from '@/components/admin/AdminSettings';
 import DashboardSettings from '@/components/admin/DashboardSettings';
 
 // Testing & Development Tools
 import { AdminTesting } from '@/components/admin/AdminTesting';
 import FixYouTubeLessons from '@/components/admin/FixYouTubeLessons';
-import VideoPlayerTesting from '@/components/admin/VideoPlayerTesting';
 
 const Admin = () => {
   const { user } = useAuth();
@@ -162,22 +160,19 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 mb-8 h-auto">
-            <TabsTrigger value="courses" className="text-xs lg:text-sm">Cursos</TabsTrigger>
-            <TabsTrigger value="lessons" className="text-xs lg:text-sm hidden lg:flex">Aulas</TabsTrigger>
-            <TabsTrigger value="images" className="text-xs lg:text-sm hidden lg:flex">Imagens</TabsTrigger>
-            <TabsTrigger value="plans" className="text-xs lg:text-sm">Planos</TabsTrigger>
-            <TabsTrigger value="users" className="text-xs lg:text-sm">Usuários</TabsTrigger>
-            <TabsTrigger value="dashboard-settings" className="text-xs lg:text-sm">Dashboard</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs lg:text-sm hidden lg:flex">Analytics</TabsTrigger>
-            <TabsTrigger value="monitoring" className="text-xs lg:text-sm hidden lg:flex">Monitor</TabsTrigger>
-            <TabsTrigger value="enrollment" className="text-xs lg:text-sm hidden lg:flex">Matrículas</TabsTrigger>
-            <TabsTrigger value="subscriptions" className="text-xs lg:text-sm hidden lg:flex">Assinaturas</TabsTrigger>
-            <TabsTrigger value="payments" className="text-xs lg:text-sm hidden lg:flex">Pagamentos</TabsTrigger>
-            <TabsTrigger value="notifications" className="text-xs lg:text-sm hidden lg:flex">Notificações</TabsTrigger>
-            <TabsTrigger value="testing" className="text-xs lg:text-sm hidden lg:flex">Testes</TabsTrigger>
-            <TabsTrigger value="video-testing" className="text-xs lg:text-sm hidden lg:flex">Players de Vídeo</TabsTrigger>
-            <TabsTrigger value="settings" className="text-xs lg:text-sm">Config</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-12">
+            <TabsTrigger value="courses">Cursos</TabsTrigger>
+            <TabsTrigger value="lessons">Aulas</TabsTrigger>
+            <TabsTrigger value="images">Imagens</TabsTrigger>
+            <TabsTrigger value="certificates">Certificados</TabsTrigger>
+            <TabsTrigger value="plans">Planos</TabsTrigger>
+            <TabsTrigger value="users">Usuários</TabsTrigger>
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="enrollments">Matrículas</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+            <TabsTrigger value="notifications">Notificações</TabsTrigger>
+            <TabsTrigger value="settings">Configurações</TabsTrigger>
           </TabsList>
           
           <TabsContent value="courses">
@@ -192,24 +187,24 @@ const Admin = () => {
             <ImageManagement />
           </TabsContent>
           
+          <TabsContent value="certificates">
+            <AdminCertificates />
+          </TabsContent>
+          
           <TabsContent value="plans">
             <AdminPlans />
           </TabsContent>
           
           <TabsContent value="users">
-            <AdminUsers />
+            <EnhancedUserManagement />
           </TabsContent>
           
-          <TabsContent value="monitoring">
-            <UserMonitoring />
+          <TabsContent value="analytics">
+            <ConsolidatedAnalytics />
           </TabsContent>
           
-          <TabsContent value="enrollment">
-            <ManualEnrollment />
-          </TabsContent>
-          
-          <TabsContent value="subscriptions">
-            <SubscriptionManagement />
+          <TabsContent value="enrollments">
+            <EnrollmentSubscriptionManager />
           </TabsContent>
           
           <TabsContent value="payments">
@@ -219,24 +214,9 @@ const Admin = () => {
           <TabsContent value="notifications">
             <NotificationManagement />
           </TabsContent>
-          
-          <TabsContent value="analytics">
-            <AdminAnalytics />
-          </TabsContent>
 
-          <TabsContent value="dashboard-settings">
+          <TabsContent value="dashboard">
             <DashboardSettings />
-          </TabsContent>
-
-          <TabsContent value="testing">
-            <div className="space-y-6">
-              <AdminTesting />
-              <FixYouTubeLessons />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="video-testing">
-            <VideoPlayerTesting />
           </TabsContent>
 
           <TabsContent value="settings">

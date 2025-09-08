@@ -9,6 +9,7 @@ const corsHeaders = {
 interface CertificateRequest {
   courseId: string;
   userId?: string;
+  customName?: string;
 }
 
 const logStep = (step: string, details?: any) => {
@@ -51,7 +52,7 @@ serve(async (req) => {
     logStep("User authenticated", { userId });
 
     // Parse request body
-    const { courseId }: CertificateRequest = await req.json();
+    const { courseId, customName }: CertificateRequest = await req.json();
     
     if (!courseId) {
       throw new Error("Missing required field: courseId");
@@ -124,7 +125,13 @@ serve(async (req) => {
 
     // Generate certificate HTML
     const certificateDate = new Date().toLocaleDateString('pt-BR');
-    const studentName = profile.full_name || profile.email?.split('@')[0] || 'Estudante';
+    const studentName = customName || profile.full_name || profile.email?.split('@')[0] || 'Estudante';
+    
+    logStep("Certificate name determined", { 
+      customName, 
+      profileName: profile.full_name, 
+      finalName: studentName 
+    });
     
     const certificateHTML = `
     <!DOCTYPE html>

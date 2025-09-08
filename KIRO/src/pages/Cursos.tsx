@@ -135,22 +135,48 @@ const CursosPage = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('purchase-course', {
-        body: {
-          type,
-          item_id: itemId,
-          billing_type: billingType
-        }
+      let requestBody: any = {
+        type: type,
+        billingType: billingType
+      };
+
+      if (type === 'course') {
+        requestBody.courseId = itemId;
+      } else if (type === 'package') {
+        requestBody.packageId = itemId;
+      } else if (type === 'plan') {
+        requestBody.planId = itemId;
+      }
+
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: requestBody
       });
 
       if (error) throw error;
 
-      if (data.payment_url) {
-        window.open(data.payment_url, '_blank');
+      if (data?.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
         toast({
           title: 'Redirecionando para pagamento',
           description: 'Você será redirecionado para completar o pagamento'
         });
+      } else if (data?.invoiceUrl) {
+        window.open(data.invoiceUrl, '_blank');
+        toast({
+          title: 'Pagamento criado!',
+          description: 'Você será redirecionado para finalizar o pagamento.'
+        });
+      } else if (data?.message) {
+        toast({
+          title: 'Solicitação de Compra Enviada!',
+          description: 'Você receberá um email em breve com as instruções de pagamento. Verifique sua caixa de entrada e spam.',
+          duration: 8000
+        });
+        
+        // Redirect to dashboard after showing the message
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 2000);
       }
     } catch (error: any) {
       toast({
@@ -329,16 +355,16 @@ const CursosPage = () => {
       <CardFooter className="flex flex-col space-y-2">
         <Button 
           className="w-full bg-blue-600 hover:bg-blue-700"
-          onClick={() => handlePurchase('plan', plan.id)}
+          onClick={() => handlePurchase('plan', plan.id, 'CREDIT_CARD')}
         >
-          Assinar Plano Mensal
+          Assinar Plano Mensal - {formatCurrency(plan.price_monthly)}
         </Button>
         <Button 
           variant="outline"
-          className="w-full"
-          onClick={() => handlePurchase('plan', plan.id)}
+          className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+          onClick={() => handlePurchase('plan', plan.id, 'PIX')}
         >
-          Assinar Plano Anual
+          Assinar Plano Anual - {formatCurrency(plan.price_yearly)}
         </Button>
       </CardFooter>
     </Card>

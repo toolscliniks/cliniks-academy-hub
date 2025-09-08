@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { 
   AlertCircle,
   ArrowLeft,
@@ -297,6 +297,7 @@ const LessonPage = () => {
   const { courseId, lessonId } = useParams<{ courseId: string; lessonId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Estados
   const [loading, setLoading] = useState(true);

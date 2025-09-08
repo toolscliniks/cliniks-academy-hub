@@ -200,7 +200,7 @@ const AdvancedVideoPlayer = ({
                 setProgress(progressPercent);
                 onProgress?.(progressPercent);
                 
-                // Verificar se completou (95% ou mais)
+                // Verificar se completou (95% ou mais - menos de 1 minuto restante)
                 if (progressPercent >= 95) {
                   onComplete?.();
                 }

@@ -24,7 +24,7 @@ serve(async (req) => {
     const user = data.user;
     if (!user) throw new Error("User not authenticated");
 
-    const { courseId } = await req.json();
+    const { courseId, customName } = await req.json();
 
     const supabaseService = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
@@ -65,7 +65,8 @@ serve(async (req) => {
 
     // Generate certificate HTML
     let certificateHtml = template.template_html;
-    certificateHtml = certificateHtml.replace(/{{STUDENT_NAME}}/g, certificate.profiles.full_name || 'Estudante');
+    const studentName = customName || certificate.profiles.full_name || 'Estudante';
+    certificateHtml = certificateHtml.replace(/{{STUDENT_NAME}}/g, studentName);
     certificateHtml = certificateHtml.replace(/{{COURSE_NAME}}/g, certificate.courses.title);
     certificateHtml = certificateHtml.replace(/{{COMPLETION_DATE}}/g, new Date(certificate.issued_at).toLocaleDateString('pt-BR'));
     certificateHtml = certificateHtml.replace(/{{INSTRUCTOR_NAME}}/g, certificate.courses.instructor_name || 'Instrutor');

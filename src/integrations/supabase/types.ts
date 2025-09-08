@@ -597,32 +597,38 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          cpf_cnpj: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
           id: string
           role: string | null
           updated_at: string | null
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           role?: string | null
           updated_at?: string | null
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           role?: string | null
           updated_at?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }
