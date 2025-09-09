@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize, Loader2, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSecureVideoPlayer } from '@/hooks/useSecureVideoPlayer';
+import { useSecureVideoPlayer, VideoType } from '@/hooks/useSecureVideoPlayer';
 import '@/styles/youtube-protection.css';
 
 interface BasicProtectedPlayerProps {

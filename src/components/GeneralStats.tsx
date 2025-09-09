@@ -129,20 +129,18 @@ const GeneralStats = ({ showHeader = true, period = '30d' }: GeneralStatsProps) 
 
       if (enrollmentsError) throw enrollmentsError;
 
-      // Buscar dados de assinaturas
+      // Buscar dados de assinaturas - usar tabela correta
       const { data: subscriptionsData, error: subscriptionsError } = await supabase
-        .from('user_subscriptions')
+        .from('subscriptions')
         .select(`
           id,
           user_id,
           created_at,
-          cancelled_at,
           status,
-          subscription_plans(
+          plans(
             id,
             name,
-            price,
-            billing_cycle
+            price_monthly
           )
         `);
 
@@ -175,9 +173,9 @@ const GeneralStats = ({ showHeader = true, period = '30d' }: GeneralStatsProps) 
       }) || [];
 
       const subscriptionRevenue = currentSubscriptions.reduce((sum, s) => {
-        const plan = s.subscription_plans;
+        const plan = s.plans;
         if (plan) {
-          const monthlyPrice = plan.billing_cycle === 'yearly' ? plan.price / 12 : plan.price;
+          const monthlyPrice = plan.price_monthly || 0;
           const daysInPeriod = selectedPeriod === '30d' ? 30 : selectedPeriod === '90d' ? 90 : 365;
           return sum + (monthlyPrice * (daysInPeriod / 30));
         }
@@ -227,9 +225,9 @@ const GeneralStats = ({ showHeader = true, period = '30d' }: GeneralStatsProps) 
       
       // Calcular MRR e ARR
       const monthlySubscriptionRevenue = currentSubscriptions.reduce((sum, s) => {
-        const plan = s.subscription_plans;
+        const plan = s.plans;
         if (plan) {
-          const monthlyPrice = plan.billing_cycle === 'yearly' ? plan.price / 12 : plan.price;
+          const monthlyPrice = plan.price_monthly || 0;
           return sum + monthlyPrice;
         }
         return sum;

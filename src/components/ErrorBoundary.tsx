@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useErrorLogger } from '@/hooks/useErrorLogger';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -59,11 +60,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 }
 
 function DefaultErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
-  const { logComponentError } = useErrorLogger();
+  const { logError } = useErrorLogger();
 
   React.useEffect(() => {
-    logComponentError('ErrorBoundary', error);
-  }, [error, logComponentError]);
+    logError(error);
+  }, [error, logError]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">

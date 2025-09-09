@@ -85,26 +85,35 @@ export type Database = {
       }
       course_enrollments: {
         Row: {
+          access_type: string | null
           completed_at: string | null
           course_id: string
           enrolled_at: string | null
           id: string
+          payment_amount: number | null
+          payment_status: string | null
           progress: number | null
           user_id: string
         }
         Insert: {
+          access_type?: string | null
           completed_at?: string | null
           course_id: string
           enrolled_at?: string | null
           id?: string
+          payment_amount?: number | null
+          payment_status?: string | null
           progress?: number | null
           user_id: string
         }
         Update: {
+          access_type?: string | null
           completed_at?: string | null
           course_id?: string
           enrolled_at?: string | null
           id?: string
+          payment_amount?: number | null
+          payment_status?: string | null
           progress?: number | null
           user_id?: string
         }
@@ -125,9 +134,55 @@ export type Database = {
           },
         ]
       }
+      course_reviews: {
+        Row: {
+          comment: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          rating: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          rating: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          rating?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           category: string | null
+          commercial_video_url: string | null
           cover_image_url: string | null
           created_at: string | null
           currency: string | null
@@ -139,12 +194,14 @@ export type Database = {
           is_featured: boolean | null
           is_published: boolean | null
           price: number | null
+          thumbnail_url: string | null
           title: string
           trailer_video_url: string | null
           updated_at: string | null
         }
         Insert: {
           category?: string | null
+          commercial_video_url?: string | null
           cover_image_url?: string | null
           created_at?: string | null
           currency?: string | null
@@ -156,12 +213,14 @@ export type Database = {
           is_featured?: boolean | null
           is_published?: boolean | null
           price?: number | null
+          thumbnail_url?: string | null
           title: string
           trailer_video_url?: string | null
           updated_at?: string | null
         }
         Update: {
           category?: string | null
+          commercial_video_url?: string | null
           cover_image_url?: string | null
           created_at?: string | null
           currency?: string | null
@@ -173,6 +232,7 @@ export type Database = {
           is_featured?: boolean | null
           is_published?: boolean | null
           price?: number | null
+          thumbnail_url?: string | null
           title?: string
           trailer_video_url?: string | null
           updated_at?: string | null
@@ -253,6 +313,7 @@ export type Database = {
           amount: number
           asaas_payment_id: string | null
           change_reason: string | null
+          course_id: string | null
           created_at: string | null
           currency: string | null
           due_date: string | null
@@ -269,6 +330,7 @@ export type Database = {
           amount: number
           asaas_payment_id?: string | null
           change_reason?: string | null
+          course_id?: string | null
           created_at?: string | null
           currency?: string | null
           due_date?: string | null
@@ -285,6 +347,7 @@ export type Database = {
           amount?: number
           asaas_payment_id?: string | null
           change_reason?: string | null
+          course_id?: string | null
           created_at?: string | null
           currency?: string | null
           due_date?: string | null
@@ -298,6 +361,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "invoices_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoices_subscription_id_fkey"
             columns: ["subscription_id"]
@@ -494,6 +564,72 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_events: {
+        Row: {
+          created_at: string | null
+          error_details: Json | null
+          id: string
+          item: Json
+          n8n_response: Json | null
+          request_id: string
+          retry_count: number | null
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_details?: Json | null
+          id?: string
+          item: Json
+          n8n_response?: Json | null
+          request_id: string
+          retry_count?: number | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_details?: Json | null
+          id?: string
+          item?: Json
+          n8n_response?: Json | null
+          request_id?: string
+          retry_count?: number | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_mode: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string
+          mode: string
+          updated_at: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          mode: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          mode?: string
+          updated_at?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       performance_logs: {
         Row: {
           created_at: string
@@ -598,7 +734,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           certificate_name: string | null
-          cpf_cnpj: string | null
+          cpf_cnpj: string
           created_at: string | null
           email: string | null
           full_name: string | null
@@ -611,7 +747,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           certificate_name?: string | null
-          cpf_cnpj?: string | null
+          cpf_cnpj: string
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -624,7 +760,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           certificate_name?: string | null
-          cpf_cnpj?: string | null
+          cpf_cnpj?: string
           created_at?: string | null
           email?: string | null
           full_name?: string | null
@@ -632,6 +768,165 @@ export type Database = {
           role?: string | null
           updated_at?: string | null
           whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      purchases: {
+        Row: {
+          course_id: string | null
+          created_at: string | null
+          customer_cpf_cnpj: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          payment_method: string
+          plan_id: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string | null
+          customer_cpf_cnpj?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          payment_method: string
+          plan_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string | null
+          customer_cpf_cnpj?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          payment_method?: string
+          plan_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchases_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchases_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rate_limits: {
+        Row: {
+          created_at: string | null
+          id: string
+          ip_address: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          ip_address: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          ip_address?: string
+        }
+        Relationships: []
+      }
+      secure_api_keys: {
+        Row: {
+          access_count: number | null
+          created_at: string | null
+          created_by: string | null
+          encrypted_key: string
+          environment: string
+          id: string
+          is_active: boolean
+          key_name: string
+          key_type: string
+          last_accessed_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          encrypted_key: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          key_name: string
+          key_type: string
+          last_accessed_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_count?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          encrypted_key?: string
+          environment?: string
+          id?: string
+          is_active?: boolean
+          key_name?: string
+          key_type?: string
+          last_accessed_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      signup_webhook_events: {
+        Row: {
+          created_at: string | null
+          error_details: Json | null
+          id: string
+          n8n_response: Json | null
+          request_id: string
+          retry_count: number | null
+          status: string
+          updated_at: string | null
+          user_data: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_details?: Json | null
+          id?: string
+          n8n_response?: Json | null
+          request_id: string
+          retry_count?: number | null
+          status?: string
+          updated_at?: string | null
+          user_data: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_details?: Json | null
+          id?: string
+          n8n_response?: Json | null
+          request_id?: string
+          retry_count?: number | null
+          status?: string
+          updated_at?: string | null
+          user_data?: Json
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -692,6 +987,42 @@ export type Database = {
           old_plan_id?: string | null
           subscription_id?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          features: string[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          price_monthly: number | null
+          price_yearly: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          features?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          price_monthly?: number | null
+          price_yearly?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -809,6 +1140,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_user_activity_log_user_id"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_activity_log_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
@@ -856,6 +1194,54 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_subscriptions: {
+        Row: {
+          created_at: string | null
+          ends_at: string | null
+          id: string
+          plan_id: string
+          starts_at: string
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string
+          plan_id: string
+          starts_at?: string
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          ends_at?: string | null
+          id?: string
+          plan_id?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       webhook_configs: {
         Row: {
@@ -931,23 +1317,194 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string | null
+          course_title: string | null
+          created_at: string | null
+          id: string | null
+          is_completed: boolean | null
+          lesson_id: string | null
+          lesson_title: string | null
+          module_id: string | null
+          module_title: string | null
+          updated_at: string | null
+          user_id: string | null
+          watch_time_seconds: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      bytea_to_text: {
+        Args: { data: string }
+        Returns: string
+      }
+      decrypt_api_key: {
+        Args: { encrypted_key: string; master_key: string }
+        Returns: string
+      }
+      encrypt_api_key: {
+        Args: { key_value: string; master_key: string }
+        Returns: string
+      }
       generate_certificate: {
         Args: { p_course_id: string; p_user_id: string }
         Returns: string
       }
       get_incomplete_lessons: {
-        Args: { p_user_id: string; p_limit: number }
-        Returns: any[]
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: {
+          course_id: string
+          course_title: string
+          cover_image_url: string
+          duration_minutes: number
+          instructor_name: string
+          last_accessed: string
+          lesson_description: string
+          lesson_id: string
+          lesson_title: string
+          module_title: string
+          progress: number
+        }[]
+      }
+      get_secure_api_key: {
+        Args: { p_key_name: string; p_master_key?: string }
+        Returns: string
+      }
+      http: {
+        Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_delete: {
+        Args:
+          | { content: string; content_type: string; uri: string }
+          | { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_get: {
+        Args: { data: Json; uri: string } | { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_head: {
+        Args: { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_header: {
+        Args: { field: string; value: string }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+      }
+      http_list_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_post: {
+        Args:
+          | { content: string; content_type: string; uri: string }
+          | { data: Json; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_put: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+      }
+      http_reset_curlopt: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      http_set_curlopt: {
+        Args: { curlopt: string; value: string }
+        Returns: boolean
+      }
+      insert_secure_api_key: {
+        Args: {
+          p_environment?: string
+          p_key_name: string
+          p_key_type: string
+          p_key_value: string
+          p_master_key?: string
+        }
+        Returns: string
+      }
+      is_admin_user: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      secure_user_operation: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      text_to_bytea: {
+        Args: { data: string }
+        Returns: string
+      }
+      urlencode: {
+        Args: { data: Json } | { string: string } | { string: string }
+        Returns: string
+      }
+      validate_password_strength: {
+        Args: { password: string }
+        Returns: boolean
       }
     }
     Enums: {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown | null
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
     }
   }
 }
