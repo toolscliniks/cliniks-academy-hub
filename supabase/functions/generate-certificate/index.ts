@@ -70,6 +70,7 @@ serve(async (req) => {
     certificateHtml = certificateHtml.replace(/{{COURSE_NAME}}/g, certificate.courses.title);
     certificateHtml = certificateHtml.replace(/{{COMPLETION_DATE}}/g, new Date(certificate.issued_at).toLocaleDateString('pt-BR'));
     certificateHtml = certificateHtml.replace(/{{INSTRUCTOR_NAME}}/g, certificate.courses.instructor_name || 'Instrutor');
+    certificateHtml = certificateHtml.replace(/{{CERTIFICATE_ID}}/g, certificateId);
 
     return new Response(JSON.stringify({ 
       certificateId,

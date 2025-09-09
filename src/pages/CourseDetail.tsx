@@ -215,6 +215,22 @@ const CourseDetail = () => {
 
         console.log('Payment response:', data);
 
+        // Check if there are missing required fields
+        if (data && data.error === 'Dados obrigatórios não preenchidos') {
+          toast({
+            title: "Dados do Perfil Incompletos",
+            description: data.message,
+            variant: "destructive",
+            duration: 8000
+          });
+          
+          // Redirect to profile page
+          setTimeout(() => {
+            navigate('/profile');
+          }, 2000);
+          return;
+        }
+
         // Show success message about payment email
         toast({
           title: "Solicitação de Compra Enviada!",
@@ -314,16 +330,26 @@ const CourseDetail = () => {
 
       if (error) throw error;
 
-      // Create a blob URL for the certificate HTML and open it
-      const certificateHtml = `data:text/html;charset=utf-8,${encodeURIComponent(data.certificateHtml || '')}`;
-      const printWindow = window.open(certificateHtml, '_blank');
+      // Decode the base64 HTML and create a blob URL
+      const base64Data = data.certificateUrl.replace('data:text/html;base64,', '');
+      const htmlContent = atob(base64Data);
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const blobUrl = URL.createObjectURL(blob);
+      
+      // Open the certificate in a new window
+      const printWindow = window.open(blobUrl, '_blank');
       
       if (printWindow) {
         printWindow.focus();
         // Add a small delay to ensure the content loads before triggering print dialog
         setTimeout(() => {
           printWindow.print();
+          // Clean up the blob URL after use
+          URL.revokeObjectURL(blobUrl);
         }, 1000);
+      } else {
+        // Clean up if window couldn't be opened
+        URL.revokeObjectURL(blobUrl);
       }
 
       toast({

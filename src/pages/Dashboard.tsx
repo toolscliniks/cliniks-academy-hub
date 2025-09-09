@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SubscriptionCard from '@/components/SubscriptionCard';
 import NotificationCenter from '@/components/NotificationCenter';
+// Componentes de estatísticas movidos para o painel administrativo
 import { BookOpen, Star, Clock, Trophy, ChevronLeft, ChevronRight, Play, User, LogOut, Loader2, TrendingUp, Pause } from 'lucide-react';
 import { useCourses } from '@/hooks/useCourses';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,7 +45,7 @@ interface IncompleteLessonWithCourse {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { courses, loading: coursesLoading } = useCourses();
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
   const [incompleteLessons, setIncompleteLessons] = useState<IncompleteLessonWithCourse[]>([]);
@@ -323,7 +324,7 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                GUSTAVO MEDEIROS
+                Cliniks Academy
               </h1>
               <nav className="hidden md:flex space-x-6">
                 <Button variant="ghost" className="text-white hover:text-primary transition-colors">Início</Button>
@@ -443,11 +444,44 @@ const Dashboard = () => {
         </div>
 
         {/* Enhanced Gradient Overlays with Dynamic Effects */}
-         <div className={`absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/30 transition-all duration-500 ${
-           isHovering ? 'from-black/95 via-black/70 to-black/40' : ''
-         }`} />
-         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+        {(() => {
+          const currentItem = carouselItems[currentSlide];
+          const transparencyLevel = currentItem?.transparency_level || 'medium';
+          
+          // Define transparency values based on level
+          const getTransparencyValues = (level: string) => {
+            switch (level) {
+              case 'low':
+                return {
+                  primary: isHovering ? 'from-black/60 via-black/30 to-black/10' : 'from-black/50 via-black/25 to-black/5',
+                  secondary: 'from-black/40 via-transparent to-black/10',
+                  tertiary: 'from-transparent via-transparent to-black/30'
+                };
+              case 'high':
+                return {
+                  primary: isHovering ? 'from-black/100 via-black/90 to-black/70' : 'from-black/95 via-black/80 to-black/60',
+                  secondary: 'from-black/90 via-transparent to-black/40',
+                  tertiary: 'from-transparent via-transparent to-black/80'
+                };
+              default: // medium
+                return {
+                  primary: isHovering ? 'from-black/95 via-black/70 to-black/40' : 'from-black/90 via-black/60 to-black/30',
+                  secondary: 'from-black/80 via-transparent to-black/20',
+                  tertiary: 'from-transparent via-transparent to-black/60'
+                };
+            }
+          };
+          
+          const transparency = getTransparencyValues(transparencyLevel);
+          
+          return (
+            <>
+              <div className={`absolute inset-0 bg-gradient-to-r ${transparency.primary} transition-all duration-500`} />
+              <div className={`absolute inset-0 bg-gradient-to-t ${transparency.secondary}`} />
+              <div className={`absolute inset-0 bg-gradient-to-b ${transparency.tertiary}`} />
+            </>
+          );
+        })()}
          
          {/* Animated Particles Effect */}
          <div className="absolute inset-0 opacity-20">
@@ -666,7 +700,7 @@ const Dashboard = () => {
           </div>
         </section>
 
-
+        {/* Estatísticas movidas para o painel administrativo */}
 
         {/* Explore Courses Section */}
         <section>

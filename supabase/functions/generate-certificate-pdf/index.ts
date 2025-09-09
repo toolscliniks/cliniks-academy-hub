@@ -123,7 +123,20 @@ serve(async (req) => {
       instructor: course.instructor_name
     });
 
-    // Generate certificate HTML
+    // Get active certificate template
+    const { data: template, error: templateError } = await supabaseClient
+      .from('certificate_templates')
+      .select('template_html')
+      .eq('is_active', true)
+      .single();
+
+    if (templateError || !template) {
+      throw new Error("Active certificate template not found");
+    }
+
+    logStep("Active template retrieved", { templateFound: !!template });
+
+    // Generate certificate HTML using active template
     const certificateDate = new Date().toLocaleDateString('pt-BR');
     const studentName = customName || profile.full_name || profile.email?.split('@')[0] || 'Estudante';
     
@@ -133,173 +146,28 @@ serve(async (req) => {
       finalName: studentName 
     });
     
-    const certificateHTML = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Certificado - ${course.title}</title>
-        <style>
-            @page {
-                margin: 0;
-                size: A4 landscape;
-            }
-            body {
-                font-family: 'Georgia', serif;
-                margin: 0;
-                padding: 40px;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: #333;
-                height: 100vh;
-                box-sizing: border-box;
-            }
-            .certificate {
-                background: white;
-                padding: 60px;
-                border-radius: 20px;
-                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                text-align: center;
-                height: calc(100vh - 80px);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                position: relative;
-                border: 8px solid #f8f9fa;
-            }
-            .certificate::before {
-                content: '';
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                right: 20px;
-                bottom: 20px;
-                border: 3px solid #667eea;
-                border-radius: 15px;
-            }
-            .header {
-                margin-bottom: 30px;
-            }
-            .title {
-                font-size: 48px;
-                font-weight: bold;
-                color: #667eea;
-                margin-bottom: 20px;
-                text-transform: uppercase;
-                letter-spacing: 3px;
-            }
-            .subtitle {
-                font-size: 18px;
-                color: #666;
-                margin-bottom: 40px;
-            }
-            .student-name {
-                font-size: 36px;
-                font-weight: bold;
-                color: #333;
-                margin: 30px 0;
-                text-decoration: underline;
-                text-decoration-color: #667eea;
-            }
-            .course-info {
-                font-size: 20px;
-                color: #555;
-                margin: 30px 0;
-                line-height: 1.6;
-            }
-            .course-title {
-                font-weight: bold;
-                color: #667eea;
-                font-size: 24px;
-            }
-            .completion-info {
-                margin-top: 40px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .date {
-                font-size: 16px;
-                color: #666;
-            }
-            .instructor {
-                text-align: center;
-            }
-            .instructor-name {
-                font-weight: bold;
-                border-top: 2px solid #333;
-                padding-top: 10px;
-                margin-top: 20px;
-            }
-            .logo {
-                position: absolute;
-                top: 40px;
-                left: 60px;
-                font-size: 24px;
-                font-weight: bold;
-                color: #667eea;
-            }
-            .seal {
-                position: absolute;
-                bottom: 40px;
-                right: 60px;
-                width: 80px;
-                height: 80px;
-                border: 4px solid #667eea;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: white;
-                font-weight: bold;
-                font-size: 12px;
-                color: #667eea;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="certificate">
-            <div class="logo">Cliniks Academy</div>
-            
-            <div class="header">
-                <div class="title">Certificado</div>
-                <div class="subtitle">de conclusão de curso</div>
-            </div>
-            
-            <div>
-                <p>Certificamos que</p>
-                <div class="student-name">${studentName}</div>
-                <p>concluiu com êxito o curso</p>
-                <div class="course-title">${course.title}</div>
-            </div>
-            
-            <div class="course-info">
-                <p>Curso ministrado por <strong>${course.instructor_name || 'Cliniks Academy'}</strong></p>
-                <p>com carga horária de <strong>${course.duration_hours} horas</strong></p>
-            </div>
-            
-            <div class="completion-info">
-                <div class="date">
-                    <p>Data de conclusão:</p>
-                    <strong>${certificateDate}</strong>
-                </div>
-                <div class="instructor">
-                    <div style="width: 200px;">
-                        <div class="instructor-name">${course.instructor_name || 'Cliniks Academy'}</div>
-                        <div style="font-size: 14px; color: #666;">Instrutor</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="seal">
-                VÁLIDO
-            </div>
-        </div>
-    </body>
-    </html>`;
+    // Replace template variables with more robust regex that handles spaces
+    let certificateHTML = template.template_html;
+    certificateHTML = certificateHTML.replace(/{{\s*STUDENT_NAME\s*}}/g, studentName);
+    certificateHTML = certificateHTML.replace(/{{\s*COURSE_NAME\s*}}/g, course.title);
+    certificateHTML = certificateHTML.replace(/{{\s*COMPLETION_DATE\s*}}/g, certificateDate);
+    certificateHTML = certificateHTML.replace(/{{\s*INSTRUCTOR_NAME\s*}}/g, course.instructor_name || 'Cliniks Academy');
+    
+    // Generate certificate ID for template
+    const certificateId = crypto.randomUUID();
+    certificateHTML = certificateHTML.replace(/{{\s*CERTIFICATE_ID\s*}}/g, certificateId);
+    
+    logStep("Template variables replaced", { 
+      originalLength: template.template_html.length,
+      finalLength: certificateHTML.length,
+      studentName,
+      courseTitle: course.title,
+      certificateDate,
+      instructorName: course.instructor_name || 'Cliniks Academy'
+    });
 
     // For now, we'll generate a simple certificate URL
     // In production, you would use a PDF generation library
-    const certificateId = crypto.randomUUID();
     
     // Store certificate in database
     const { data: certificate, error: certificateError } = await supabaseClient

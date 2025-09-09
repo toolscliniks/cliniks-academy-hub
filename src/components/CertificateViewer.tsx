@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Award, Download, Share, Printer } from 'lucide-react';
+import { Award, Download, Share, Printer, Trash2 } from 'lucide-react';
 
 interface CertificateViewerProps {
   courseId: string;
@@ -35,14 +35,27 @@ const CertificateViewer = ({ courseId, courseName, onClose }: CertificateViewerP
 
       if (error) throw error;
 
+      console.log('Certificate data received:', data);
+      
       setCertificateHtml(data.certificateHtml);
       setCertificateId(data.certificateId);
+      
+      console.log('Certificate ID set:', data.certificateId);
       
       toast({
         title: "Certificado gerado!",
         description: "Seu certificado está pronto para visualização."
       });
+      
+      // Atualizar lista de certificados se a função estiver disponível
+      if ((window as any).refreshCertificates) {
+        console.log('Calling refreshCertificates');
+        (window as any).refreshCertificates();
+      } else {
+        console.log('refreshCertificates function not available');
+      }
     } catch (error: any) {
+      console.error('Certificate generation error:', error);
       toast({
         title: "Erro ao gerar certificado",
         description: error.message,
@@ -53,49 +66,122 @@ const CertificateViewer = ({ courseId, courseName, onClose }: CertificateViewerP
     }
   };
 
+  const deleteCertificate = async () => {
+    if (!certificateId) {
+      console.log('No certificate ID available for deletion');
+      return;
+    }
+
+    // Confirmar antes de excluir
+    if (!confirm('Tem certeza que deseja excluir este certificado?')) {
+      return;
+    }
+
+    try {
+      console.log('Deleting certificate with ID:', certificateId);
+      
+      const { error } = await supabase
+        .from('certificates')
+        .delete()
+        .eq('id', certificateId);
+
+      if (error) throw error;
+
+      setCertificateHtml('');
+      setCertificateId('');
+      
+      toast({
+        title: "Certificado excluído",
+        description: "O certificado foi removido com sucesso."
+      });
+      
+      // Atualizar lista de certificados se a função estiver disponível
+      if ((window as any).refreshCertificates) {
+        console.log('Calling refreshCertificates after deletion');
+        (window as any).refreshCertificates();
+      }
+      
+      onClose();
+    } catch (error: any) {
+      console.error('Error deleting certificate:', error);
+      toast({
+        title: "Erro ao excluir certificado",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  };
+
+  const regenerateCertificate = async () => {
+    if (certificateId) {
+      await deleteCertificate();
+    }
+    await generateCertificate();
+  };
+
   const downloadCertificate = () => {
     if (!certificateHtml) return;
 
-    // Create a new window for printing/saving as PDF
+    // Create a new window for printing/saving as PDF with landscape orientation
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(certificateHtml);
       printWindow.document.close();
       printWindow.focus();
-    }
-  };
-
-  const printCertificate = () => {
-    if (!certificateHtml) return;
-
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(certificateHtml);
-      printWindow.document.close();
-      printWindow.print();
+      
+      // Trigger print dialog automatically for PDF download
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
     }
   };
 
   const shareCertificate = async () => {
-    const shareData = {
-      title: `Certificado - ${courseName}`,
-      text: `Concluí com sucesso o curso "${courseName}" na Cliniks Academy!`,
-      url: `${window.location.origin}/certificate/${certificateId}`
-    };
+    if (!certificateHtml) return;
 
     try {
-      if (navigator.share) {
+      // Create a blob with the certificate HTML for sharing
+      const blob = new Blob([certificateHtml], { type: 'text/html' });
+      const file = new File([blob], `certificado-${courseName.replace(/\s+/g, '-').toLowerCase()}.html`, { type: 'text/html' });
+      
+      const shareData = {
+        title: `Certificado - ${courseName}`,
+        text: `Concluí com sucesso o curso "${courseName}" na Cliniks Academy!`,
+        files: [file]
+      };
+
+      if (navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
+      } else if (navigator.share) {
+        // Fallback without file
+        await navigator.share({
+          title: shareData.title,
+          text: shareData.text,
+          url: `${window.location.origin}/certificate/${certificateId}`
+        });
       } else {
-        // Fallback - copy to clipboard
-        await navigator.clipboard.writeText(shareData.url);
+        // Create download link as fallback
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `certificado-${courseName.replace(/\s+/g, '-').toLowerCase()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
         toast({
-          title: "Link copiado!",
-          description: "O link do certificado foi copiado para a área de transferência."
+          title: "Certificado baixado!",
+          description: "O arquivo do certificado foi baixado para compartilhamento."
         });
       }
     } catch (error) {
       console.error('Error sharing certificate:', error);
+      toast({
+        title: "Erro ao compartilhar",
+        description: "Não foi possível compartilhar o certificado.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -126,13 +212,17 @@ const CertificateViewer = ({ courseId, courseName, onClose }: CertificateViewerP
               <Download className="w-4 h-4 mr-2" />
               Baixar
             </Button>
-            <Button variant="outline" size="sm" onClick={printCertificate}>
-              <Printer className="w-4 h-4 mr-2" />
-              Imprimir
-            </Button>
             <Button variant="outline" size="sm" onClick={shareCertificate}>
               <Share className="w-4 h-4 mr-2" />
               Compartilhar
+            </Button>
+            <Button variant="outline" size="sm" onClick={regenerateCertificate}>
+              <Award className="w-4 h-4 mr-2" />
+              Regenerar
+            </Button>
+            <Button variant="destructive" size="sm" onClick={deleteCertificate}>
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir
             </Button>
             <Button variant="ghost" size="sm" onClick={onClose}>
               ✕

@@ -395,7 +395,7 @@ const AdminCourses = () => {
             </Button>
           </DialogTrigger>
           
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingCourse ? 'Editar Curso' : 'Criar Novo Curso'}
@@ -406,7 +406,7 @@ const AdminCourses = () => {
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Título</Label>
                   <Input
@@ -472,7 +472,7 @@ const AdminCourses = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Preço (R$)</Label>
                   <Input

@@ -597,6 +597,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           bio: string | null
+          certificate_name: string | null
           cpf_cnpj: string | null
           created_at: string | null
           email: string | null
@@ -609,6 +610,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           bio?: string | null
+          certificate_name?: string | null
           cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
@@ -621,6 +623,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           bio?: string | null
+          certificate_name?: string | null
           cpf_cnpj?: string | null
           created_at?: string | null
           email?: string | null
@@ -934,6 +937,10 @@ export type Database = {
       generate_certificate: {
         Args: { p_course_id: string; p_user_id: string }
         Returns: string
+      }
+      get_incomplete_lessons: {
+        Args: { p_user_id: string; p_limit: number }
+        Returns: any[]
       }
     }
     Enums: {

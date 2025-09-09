@@ -21,6 +21,7 @@ import Lesson from "./pages/Lesson";
 import CourseDetail from "./pages/CourseDetail";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Certificates from "./pages/Certificates";
+import CertificateView from "./pages/CertificateView";
 import MyCourses from "./pages/MyCourses";
 import MySubscriptions from "./pages/MySubscriptions";
 
@@ -100,6 +101,7 @@ const App = () => {
               } />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/certificates" element={<ProtectedRoute><Certificates /></ProtectedRoute>} />
+              <Route path="/certificate/:certificateId" element={<CertificateView />} />
               <Route path="/my-courses" element={
                 <ProtectedRoute>
                   <MyCourses />

@@ -107,15 +107,28 @@ serve(async (req: Request) => {
     const body = await req.json();
     console.log('Received request body:', body);
 
+    // Get user profile data if user is authenticated
+    let userProfile = null;
+    if (user) {
+      const { data: profileData } = await supabaseClient
+        .from('profiles')
+        .select('full_name, cpf_cnpj, whatsapp')
+        .eq('id', user.id)
+        .single();
+      
+      userProfile = profileData;
+      logStep("User profile loaded", userProfile);
+    }
+
     const { 
       courseId, 
       planId, 
       type, 
       billingType = 'PIX',
-      customerName = 'Cliente Teste',
+      customerName = userProfile?.full_name || user?.user_metadata?.full_name || 'Cliente Teste',
       customerEmail = user?.email || 'teste@cliniks.com.br',
-      customerCpfCnpj,
-      customerPhone
+      customerCpfCnpj = userProfile?.cpf_cnpj,
+      customerPhone = userProfile?.whatsapp
     }: PaymentRequest = body;
     
     // Input validation and sanitization
@@ -149,8 +162,10 @@ serve(async (req: Request) => {
     }
     
     // Sanitize string inputs
-    const sanitizedCustomerName = customerName.trim().substring(0, 100);
-    const sanitizedCustomerEmail = customerEmail.trim().toLowerCase();
+    const sanitizedCustomerName = customerName ? customerName.trim().substring(0, 100) : '';
+    const sanitizedCustomerEmail = customerEmail ? customerEmail.trim().toLowerCase() : '';
+    const sanitizedCustomerPhone = customerPhone ? customerPhone.trim() : '';
+    const sanitizedCustomerCpfCnpj = customerCpfCnpj ? customerCpfCnpj.trim() : '';
     
     logStep("Request data validated and sanitized", { 
       courseId, 
@@ -234,6 +249,47 @@ serve(async (req: Request) => {
       type: itemType
     });
 
+    // Validate required data before proceeding
+    const missingFields = [];
+    if (!sanitizedCustomerName || sanitizedCustomerName === '') {
+      missingFields.push('nome completo');
+    }
+    if (!sanitizedCustomerEmail || sanitizedCustomerEmail === '') {
+      missingFields.push('email');
+    }
+    if (!sanitizedCustomerPhone || sanitizedCustomerPhone === '') {
+      missingFields.push('telefone/WhatsApp');
+    }
+    if (!sanitizedCustomerCpfCnpj || sanitizedCustomerCpfCnpj === '') {
+      missingFields.push('CPF/CNPJ');
+    }
+
+    if (missingFields.length > 0) {
+      logStep("Missing required fields", { missingFields });
+      return new Response(
+        JSON.stringify({
+          error: 'Dados obrigatórios não preenchidos',
+          message: `Para processar o pagamento, você precisa completar seu perfil com os seguintes dados: ${missingFields.join(', ')}. Por favor, acesse seu perfil e preencha essas informações.`,
+          missingFields,
+          redirectTo: '/profile'
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          }
+        }
+      );
+    }
+
+    logStep("All required data validated successfully", {
+      nome: sanitizedCustomerName,
+      email: sanitizedCustomerEmail,
+      whatsapp: sanitizedCustomerPhone,
+      cpf_cnpj: sanitizedCustomerCpfCnpj
+    });
+
     // Get webhook URL from settings
     const { data: webhookSettings } = await supabaseClient
       .from('site_settings')
@@ -247,8 +303,8 @@ serve(async (req: Request) => {
     const webhookData: WebhookData = {
       nome: sanitizedCustomerName,
       email: sanitizedCustomerEmail,
-      whatsapp: customerPhone || '',
-      cpf_cnpj: customerCpfCnpj || '',
+      whatsapp: sanitizedCustomerPhone,
+      cpf_cnpj: sanitizedCustomerCpfCnpj,
       forma_pagamento: billingType
     };
 
@@ -263,6 +319,10 @@ serve(async (req: Request) => {
 
     // Send data to n8n webhook using the webhook handler function
     const { data: webhookResult, error: webhookError } = await supabaseClient.functions.invoke('n8n-webhook-handler', {
+      headers: {
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        'Content-Type': 'application/json'
+      },
       body: {
         event_type: 'payment_webhook',
         webhook_url: webhookUrl,
@@ -290,8 +350,8 @@ serve(async (req: Request) => {
         user_id: user?.id || null,
         customer_name: sanitizedCustomerName,
         customer_email: sanitizedCustomerEmail,
-        customer_phone: customerPhone,
-        customer_cpf_cnpj: customerCpfCnpj,
+        customer_phone: sanitizedCustomerPhone,
+        customer_cpf_cnpj: sanitizedCustomerCpfCnpj,
         course_id: courseId || null,
         plan_id: planId || null,
         payment_method: billingType,

@@ -44,6 +44,22 @@ const ModernHomepage = () => {
 
       if (error) throw error;
 
+      // Check if there are missing required fields
+      if (data && data.error === 'Dados obrigatórios não preenchidos') {
+        toast({
+          title: "Dados do Perfil Incompletos",
+          description: data.message,
+          variant: "destructive",
+          duration: 8000
+        });
+        
+        // Redirect to profile page
+        setTimeout(() => {
+          navigate('/profile');
+        }, 2000);
+        return;
+      }
+
       if (data?.checkoutUrl) {
         window.open(data.checkoutUrl, '_blank');
       } else if (data?.message) {

@@ -5,6 +5,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import CourseAccessStats from '@/components/CourseAccessStats';
+import SalesStats from '@/components/SalesStats';
+import SubscriptionStats from '@/components/SubscriptionStats';
+import InstructorStats from '@/components/InstructorStats';
+import GeneralStats from '@/components/GeneralStats';
 import { 
   Users, Activity, PlayCircle, Clock, TrendingUp, Eye, 
   BookOpen, CreditCard, Calendar, BarChart3, PieChart,
@@ -414,11 +419,12 @@ const ConsolidatedAnalytics = () => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="users">Usuários Online</TabsTrigger>
           <TabsTrigger value="courses">Performance Cursos</TabsTrigger>
           <TabsTrigger value="revenue">Receita</TabsTrigger>
+          <TabsTrigger value="stats">Estatísticas</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
@@ -659,6 +665,35 @@ const ConsolidatedAnalytics = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="stats" className="space-y-6">
+          <div className="space-y-8">
+            {/* Estatísticas de Acesso por Curso */}
+            <section>
+              <CourseAccessStats showHeader={true} />
+            </section>
+
+            {/* Estatísticas de Vendas */}
+            <section>
+              <SalesStats showHeader={true} />
+            </section>
+
+            {/* Estatísticas de Planos de Assinatura */}
+            <section>
+              <SubscriptionStats showHeader={true} />
+            </section>
+
+            {/* Estatísticas por Professor */}
+            <section>
+              <InstructorStats showHeader={true} limit={8} />
+            </section>
+
+            {/* Estatísticas Gerais */}
+            <section>
+              <GeneralStats showHeader={true} period="30d" />
+            </section>
           </div>
         </TabsContent>
       </Tabs>

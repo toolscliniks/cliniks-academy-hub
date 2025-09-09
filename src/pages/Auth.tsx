@@ -76,7 +76,7 @@ const Auth = () => {
 
         toast({
           title: "Cadastro realizado!",
-          description: "Verifique seu email para confirmar a conta."
+          description: "Iuup! Agora você já tem cadastro na Cliniks Academy! Bons Estudos!!!"
         });
       }
     } catch (error: any) {

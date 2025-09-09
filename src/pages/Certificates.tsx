@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Award, Download, Eye, Calendar, ArrowLeft } from 'lucide-react';
+import { Award, Download, Eye, Calendar, ArrowLeft, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Certificate {
@@ -40,6 +40,8 @@ const Certificates = () => {
     try {
       setLoading(true);
       
+      console.log('Fetching certificates for user:', user.id);
+      
       const { data, error } = await supabase
         .from('certificates')
         .select(`
@@ -55,6 +57,8 @@ const Certificates = () => {
         .order('issued_at', { ascending: false });
 
       if (error) throw error;
+      
+      console.log('Certificates fetched:', data);
       setCertificates(data || []);
     } catch (error) {
       console.error('Error fetching certificates:', error);
@@ -68,8 +72,59 @@ const Certificates = () => {
     }
   };
 
-  const viewCertificate = (certificateUrl: string) => {
-    window.open(certificateUrl, '_blank');
+  // Função para recarregar certificados (pode ser chamada de outros componentes)
+  const refreshCertificates = () => {
+    fetchCertificates();
+  };
+
+  // Expor a função globalmente para outros componentes
+  useEffect(() => {
+    (window as any).refreshCertificates = refreshCertificates;
+    return () => {
+      delete (window as any).refreshCertificates;
+    };
+  }, []);
+
+  const viewCertificate = (certificateId: string) => {
+    navigate(`/certificate/${certificateId}`);
+  };
+
+  const downloadCertificate = (certificateId: string) => {
+    navigate(`/certificate/${certificateId}`);
+  };
+
+  const deleteCertificate = async (certificateId: string, courseTitle: string) => {
+    // Confirmar antes de excluir
+    if (!confirm(`Tem certeza que deseja excluir o certificado do curso "${courseTitle}"?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('certificates')
+        .delete()
+        .eq('id', certificateId)
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      // Toast de sucesso após exclusão
+      toast({
+        title: "Sucesso",
+        description: `Certificado do curso "${courseTitle}" foi excluído com sucesso!`,
+        variant: "default"
+      });
+
+      // Recarregar a lista de certificados
+      fetchCertificates();
+    } catch (error) {
+      console.error('Error deleting certificate:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir o certificado",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
@@ -140,7 +195,7 @@ const Certificates = () => {
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      onClick={() => viewCertificate(certificate.certificate_url)}
+                      onClick={() => viewCertificate(certificate.id)}
                       className="flex-1"
                     >
                       <Eye className="w-4 h-4 mr-1" />
@@ -149,11 +204,19 @@ const Certificates = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => viewCertificate(certificate.certificate_url)}
+                      onClick={() => downloadCertificate(certificate.id)}
                       className="flex-1"
                     >
                       <Download className="w-4 h-4 mr-1" />
                       Baixar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteCertificate(certificate.id, certificate.courses.title)}
+                      className="px-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </CardContent>

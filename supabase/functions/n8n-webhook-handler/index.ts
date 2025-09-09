@@ -20,6 +20,20 @@ serve(async (req) => {
   }
 
   try {
+    // Check for authorization header
+    const authHeader = req.headers.get('Authorization');
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!authHeader || !authHeader.includes(`Bearer ${serviceRoleKey}`)) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid or missing Bearer token" }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",

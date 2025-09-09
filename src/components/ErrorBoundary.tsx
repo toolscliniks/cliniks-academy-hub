@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { useErrorLogger } from '@/hooks/useErrorLogger';
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -15,8 +14,6 @@ interface ErrorBoundaryProps {
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  private errorLogger: ReturnType<typeof useErrorLogger> | null = null;
-
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };

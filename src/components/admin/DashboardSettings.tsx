@@ -40,7 +40,8 @@ const DashboardSettings = () => {
     is_active: true,
     show_title: true,
     show_description: true,
-    content_position: 'overlay' as 'overlay' | 'bottom'
+    content_position: 'overlay' as 'overlay' | 'bottom',
+    transparency_level: 'medium' as 'low' | 'medium' | 'high'
   });
 
   useEffect(() => {
@@ -215,7 +216,8 @@ const DashboardSettings = () => {
       is_active: true,
       show_title: true,
       show_description: true,
-      content_position: 'overlay'
+      content_position: 'overlay',
+      transparency_level: 'medium'
     });
     setEditingCarouselItem(null);
     setIsCarouselDialogOpen(false);
@@ -328,7 +330,8 @@ const DashboardSettings = () => {
       is_active: item.is_active,
       show_title: item.show_title ?? true,
       show_description: item.show_description ?? true,
-      content_position: item.content_position || 'overlay'
+      content_position: item.content_position || 'overlay',
+      transparency_level: item.transparency_level || 'medium'
     });
     setIsCarouselDialogOpen(true);
   };
@@ -613,6 +616,43 @@ const DashboardSettings = () => {
                         </label>
                       </div>
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Nível de Transparência</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <label className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="transparency_level"
+                          value="low"
+                          checked={carouselFormData.transparency_level === 'low'}
+                          onChange={(e) => setCarouselFormData(prev => ({...prev, transparency_level: e.target.value as 'low' | 'medium' | 'high'}))}
+                        />
+                        <span className="text-sm">Baixa</span>
+                      </label>
+                      <label className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="transparency_level"
+                          value="medium"
+                          checked={carouselFormData.transparency_level === 'medium'}
+                          onChange={(e) => setCarouselFormData(prev => ({...prev, transparency_level: e.target.value as 'low' | 'medium' | 'high'}))}
+                        />
+                        <span className="text-sm">Média</span>
+                      </label>
+                      <label className="flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="radio"
+                          name="transparency_level"
+                          value="high"
+                          checked={carouselFormData.transparency_level === 'high'}
+                          onChange={(e) => setCarouselFormData(prev => ({...prev, transparency_level: e.target.value as 'low' | 'medium' | 'high'}))}
+                        />
+                        <span className="text-sm">Alta</span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Controla a opacidade do overlay sobre a imagem/vídeo</p>
                   </div>
 
                   <div className="flex items-center space-x-2">

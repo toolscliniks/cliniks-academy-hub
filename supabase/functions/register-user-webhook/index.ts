@@ -31,8 +31,8 @@ Deno.serve(async (req: Request) => {
     // Get register webhook URL from site_settings
     const { data: settings, error: settingsError } = await supabase
       .from('site_settings')
-      .select('value')
-      .eq('key', 'register_webhook_url')
+      .select('setting_value')
+      .eq('setting_key', 'register_webhook_url')
       .single();
 
     if (settingsError) {
@@ -40,7 +40,7 @@ Deno.serve(async (req: Request) => {
       throw new Error('Register webhook URL not configured');
     }
 
-    const webhookUrl = settings?.value?.replace(/"/g, '');
+    const webhookUrl = settings?.setting_value?.replace(/"/g, '');
     if (!webhookUrl) {
       throw new Error('Register webhook URL not configured');
     }

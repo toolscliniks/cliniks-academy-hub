@@ -11,4 +11,5 @@ export interface DashboardCarouselItem {
   show_title?: boolean;
   show_description?: boolean;
   content_position?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center-center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  transparency_level?: 'low' | 'medium' | 'high';
 }

@@ -188,10 +188,18 @@ const AdminCertificates = () => {
     </div>
     
     <div class="certificate-footer">
-      <div class="signature">
-        <div class="signature-line"></div>
-        <p>{{INSTRUCTOR_NAME}}</p>
-        <p class="title">Instrutor</p>
+      <div class="signatures">
+        <div class="signature">
+          <div class="signature-line"></div>
+          <p>{{INSTRUCTOR_NAME}}</p>
+          <p class="title">Instrutor</p>
+        </div>
+        
+        <div class="signature">
+          <div class="signature-line"></div>
+          <p>{{STUDENT_NAME}}</p>
+          <p class="title">Aluno</p>
+        </div>
       </div>
       
       <div class="certificate-id">
@@ -206,24 +214,61 @@ const AdminCertificates = () => {
   const getDefaultStyles = () => {
     return `
 .certificate {
-  width: 800px;
-  height: 600px;
+  width: 297mm;
+  height: 210mm;
   margin: 0 auto;
-  padding: 40px;
-  border: 8px solid #2563eb;
+  padding: 20mm;
+  border: 4px solid #2563eb;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   font-family: 'Georgia', serif;
   position: relative;
+  box-sizing: border-box;
+}
+
+@media print {
+  .certificate {
+    width: 297mm;
+    height: 210mm;
+    margin: 0;
+    padding: 15mm;
+    border: 2px solid #2563eb;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+}
+
+.certificate::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjEwMCIgcj0iODAiIGZpbGw9InVybCgjZ3JhZGllbnQwXzFfMikiLz4KPGV4dCB4PSIxMDAiIHk9IjEwNSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkM8L3RleHQ+CjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9ImdyYWRpZW50MF8xXzIiIHgxPSI0MCIgeTE9IjQwIiB4Mj0iMTYwIiB5Mj0iMTYwIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNFNjFCRkYiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDBCQ0Q0Ii8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPHN2Zz4K');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.1;
+  z-index: 0;
 }
 
 .certificate-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
 }
 
 .logo h1 {
   color: #2563eb;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   margin: 0;
   letter-spacing: 2px;
@@ -231,35 +276,37 @@ const AdminCertificates = () => {
 
 .certificate-body {
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .certificate-title {
-  font-size: 32px;
+  font-size: 28px;
   color: #1e40af;
-  margin-bottom: 40px;
+  margin-bottom: 25px;
   font-weight: bold;
   letter-spacing: 1px;
 }
 
 .certificate-text p {
-  font-size: 18px;
+  font-size: 16px;
   color: #374151;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 .student-name {
-  font-size: 36px;
+  font-size: 30px;
   color: #1e40af;
-  margin: 20px 0;
+  margin: 15px 0;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .course-name {
-  font-size: 24px;
+  font-size: 20px;
   color: #2563eb;
-  margin: 20px 0;
+  margin: 15px 0;
   font-style: italic;
 }
 
@@ -267,18 +314,28 @@ const AdminCertificates = () => {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-top: 60px;
+  margin-top: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.signatures {
+  display: flex;
+  justify-content: space-between;
+  width: 400px;
+  gap: 40px;
 }
 
 .signature {
   text-align: center;
+  flex: 1;
 }
 
 .signature-line {
-  width: 200px;
+  width: 150px;
   height: 2px;
   background-color: #374151;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .signature p {
