@@ -38,13 +38,13 @@ const BasicProtectedPlayer = ({
   // Use the new secure video player hook
   const [playerState, playerActions] = useSecureVideoPlayer({
     videoUrl: videoUrl || '',
-    videoType,
+    videoType: videoType as VideoType,
     onComplete,
     onProgress,
     protectionLevel
   });
 
-  const { detectedVideoType, extractVideoId, formatTime } = playerActions;
+  const { extractVideoId, formatTime } = playerActions;
 
   // Função para extrair ID do YouTube
   const getYouTubeId = (url: string): string | null => {
@@ -161,9 +161,8 @@ const BasicProtectedPlayer = ({
       ref={playerRef}
       className={`relative w-full aspect-video bg-black rounded-lg overflow-hidden group video-protected youtube-protected ${className}`}
       onMouseMove={handleMouseMove}
-      onMouseLeave={() => setShowControls(false)}
+      onMouseLeave={() => setControlsVisible(false)}
       onContextMenu={(e) => e.preventDefault()}
-      onSelectStart={(e) => e.preventDefault()}
       onDragStart={(e) => e.preventDefault()}
       style={{ userSelect: 'none' }}
     >
