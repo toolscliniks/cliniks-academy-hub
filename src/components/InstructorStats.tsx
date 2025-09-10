@@ -103,28 +103,26 @@ const InstructorStats = ({ showHeader = true, limit = 10 }: InstructorStatsProps
       // Buscar dados dos cursos com informações dos instrutores
       const { data: coursesData, error: coursesError } = await supabase
         .from('courses')
-        .select(`
+      .select(`
+        id,
+        title,
+        instructor_name,
+        price,
+        created_at,
+        course_enrollments!inner(
           id,
-          title,
-          instructor_name,
-          instructor_avatar,
-          price,
-          created_at,
-          course_enrollments!inner(
-            id,
-            user_id,
-            enrolled_at,
-            completed_at,
-            payment_amount,
-            payment_status,
-            progress
-          ),
-          course_reviews(
-            id,
-            rating,
-            created_at
-          )
-        `);
+          user_id,
+          enrolled_at,
+          completed_at,
+          payment_amount,
+          payment_status
+        ),
+        course_reviews(
+          id,
+          rating,
+          created_at
+        )
+      `);
 
       if (coursesError) throw coursesError;
 
@@ -177,7 +175,7 @@ const InstructorStats = ({ showHeader = true, limit = 10 }: InstructorStatsProps
           instructorMap.set(instructorName, {
             instructor_id: instructorName.toLowerCase().replace(/\s+/g, '_'),
             instructor_name: instructorName,
-            instructor_avatar: course.instructor_avatar,
+            instructor_avatar: '/placeholder.svg',
             total_students: 0,
             active_students: 0,
             total_courses: 0,
@@ -199,7 +197,7 @@ const InstructorStats = ({ showHeader = true, limit = 10 }: InstructorStatsProps
         
         // Atualizar métricas do instrutor
         instructor.total_students += totalEnrollments;
-        instructor.active_students += periodEnrollments.filter(e => !e.completed_at && e.progress > 0).length;
+        instructor.active_students += periodEnrollments.filter(e => !e.completed_at).length;
         instructor.total_courses += 1;
         instructor.published_courses += 1; // Assumindo que todos os cursos retornados estão publicados
         instructor.total_revenue += courseRevenue;

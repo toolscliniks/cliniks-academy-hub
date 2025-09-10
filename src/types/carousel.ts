@@ -10,6 +10,6 @@ export interface DashboardCarouselItem {
   order_index: number;
   show_title?: boolean;
   show_description?: boolean;
-  content_position?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center-center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right';
+  content_position?: 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center-center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'overlay' | 'bottom';
   transparency_level?: 'low' | 'medium' | 'high';
 }

@@ -40,7 +40,7 @@ const DashboardSettings = () => {
     is_active: true,
     show_title: true,
     show_description: true,
-    content_position: 'overlay' as 'overlay' | 'bottom',
+    content_position: 'bottom-center' as 'overlay' | 'bottom' | 'top-left' | 'top-center' | 'top-right' | 'center-left' | 'center-center' | 'center-right' | 'bottom-left' | 'bottom-center' | 'bottom-right',
     transparency_level: 'medium' as 'low' | 'medium' | 'high'
   });
 
@@ -216,7 +216,7 @@ const DashboardSettings = () => {
       is_active: true,
       show_title: true,
       show_description: true,
-      content_position: 'overlay',
+      content_position: 'bottom-center',
       transparency_level: 'medium'
     });
     setEditingCarouselItem(null);
@@ -330,7 +330,7 @@ const DashboardSettings = () => {
       is_active: item.is_active,
       show_title: item.show_title ?? true,
       show_description: item.show_description ?? true,
-      content_position: item.content_position || 'overlay',
+      content_position: item.content_position || 'bottom-center',
       transparency_level: item.transparency_level || 'medium'
     });
     setIsCarouselDialogOpen(true);
@@ -350,7 +350,7 @@ const DashboardSettings = () => {
         .from('site_settings')
         .upsert({
           setting_key: 'dashboard_carousel',
-          setting_value: updatedItems,
+          setting_value: updatedItems as any,
           updated_at: new Date().toISOString()
         }, { onConflict: 'setting_key' });
 
@@ -730,19 +730,17 @@ const DashboardSettings = () => {
                     <span className="text-sm font-medium text-gray-700">Personalização</span>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <Switch
-                          size="sm"
-                          checked={item.show_title ?? true}
-                          onCheckedChange={(checked) => updateCarouselItemSettings(item.id, { show_title: checked })}
-                        />
+                          <Switch 
+                            checked={item.show_title ?? true}
+                            onCheckedChange={(checked) => updateCarouselItemSettings(item.id, { show_title: checked })}
+                          />
                         <Label className="text-xs text-gray-700">Título</Label>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Switch
-                          size="sm"
-                          checked={item.show_description ?? true}
-                          onCheckedChange={(checked) => updateCarouselItemSettings(item.id, { show_description: checked })}
-                        />
+                          <Switch 
+                            checked={item.show_description ?? true}
+                            onCheckedChange={(checked) => updateCarouselItemSettings(item.id, { show_description: checked })}
+                          />
                         <Label className="text-xs text-gray-700">Descrição</Label>
                       </div>
                       <div className="flex flex-col gap-1">

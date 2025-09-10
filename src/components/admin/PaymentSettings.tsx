@@ -22,7 +22,11 @@ const PaymentSettings = () => {
 
   const testN8nWebhook = async () => {
     if (!settings.n8n_webhook_url) {
-      toast.error('URL do webhook n8n não configurada');
+      toast({
+        title: "Erro",
+        description: "URL do webhook n8n não configurada",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -48,14 +52,21 @@ const PaymentSettings = () => {
       });
 
       if (response.ok) {
-        toast.success('Webhook testado com sucesso!');
+        toast({
+          title: "Sucesso",
+          description: "Webhook testado com sucesso!"
+        });
       } else {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Erro ao testar webhook');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao testar webhook:', error);
-      toast.error(`Falha ao testar webhook: ${error.message}`);
+      toast({
+        title: "Erro",
+        description: `Falha ao testar webhook: ${error.message}`,
+        variant: "destructive"
+      });
     }
   };
 
@@ -182,14 +193,14 @@ const PaymentSettings = () => {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Asaas Habilitado</Label>
+                <Label>Usar Asaas (Legacy)</Label>
                 <Switch
-                  checked={settings.asaas_enabled}
-                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, asaas_enabled: checked }))}
+                  checked={settings.payment_mode === 'direct'}
+                  onCheckedChange={(checked) => setSettings(prev => ({ ...prev, payment_mode: checked ? 'direct' : 'n8n' }))}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Habilitar integração com gateway Asaas
+                Usar integração direta com Asaas (não recomendado)
               </p>
             </div>
           </CardContent>
@@ -269,7 +280,7 @@ const PaymentSettings = () => {
             <div className="text-center p-4 bg-muted/20 rounded-lg">
               <div className="font-medium">Gateway Asaas</div>
               <div className="text-2xl font-bold text-primary mt-2">
-                {settings.asaas_enabled ? 'Ativo' : 'Inativo'}
+                {settings.payment_mode === 'direct' ? 'Ativo' : 'Inativo'}
               </div>
             </div>
             

@@ -228,7 +228,14 @@ const ConsolidatedAnalytics = () => {
         .limit(50);
 
       if (error) throw error;
-      setRecentActivities(data || []);
+      
+      if (data) {
+        const formattedData = data.map(item => ({
+          ...item,
+          description: item.activity_description || ''
+        }));
+        setRecentActivities(formattedData);
+      }
     } catch (error: any) {
       console.error('Error fetching activities:', error);
     }

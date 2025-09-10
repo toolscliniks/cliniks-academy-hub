@@ -4,8 +4,8 @@ import { useAuth } from '@/components/AuthProvider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import SubscriptionCard from '@/components/SubscriptionCard';
 import NotificationCenter from '@/components/NotificationCenter';
+import CourseAccessStatsSimple from '@/components/CourseAccessStatsSimple';
 // Componentes de estatísticas movidos para o painel administrativo
 import { BookOpen, Star, Clock, Trophy, ChevronLeft, ChevronRight, Play, User, LogOut, Loader2, TrendingUp, Pause } from 'lucide-react';
 import { useCourses } from '@/hooks/useCourses';
