@@ -747,8 +747,8 @@ const DashboardSettings = () => {
                         <Label className="text-xs text-gray-700">Posição:</Label>
                         <select
                           className="text-xs border rounded px-2 py-1 w-full bg-white text-gray-900"
-                          value={item.content_position || 'center-left'}
-                          onChange={(e) => updateCarouselItemSettings(item.id, { content_position: e.target.value })}
+          value={item.content_position as any || 'center-left'}
+                          onChange={(e) => updateCarouselItemSettings(item.id, { content_position: e.target.value as any })}
                         >
                           <option value="top-left">Topo Esquerda</option>
                           <option value="top-center">Topo Centro</option>

@@ -12,7 +12,7 @@ import ImageManagement from '@/components/admin/ImageManagement';
 import AdminCertificates from '@/components/admin/AdminCertificates';
 import AdminPlans from '@/components/admin/AdminPlans';
 import EnhancedUserManagement from '@/components/admin/EnhancedUserManagement';
-import ConsolidatedAnalytics from '@/components/admin/ConsolidatedAnalytics';
+import { ConsolidatedAnalytics } from '@/components/admin/ConsolidatedAnalytics';
 import EnrollmentSubscriptionManager from '@/components/admin/EnrollmentSubscriptionManager';
 import PaymentSettings from '@/components/admin/PaymentSettings';
 import NotificationManagement from '@/components/admin/NotificationManagement';

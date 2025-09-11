@@ -27,7 +27,7 @@ import {
   ListVideo
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import SecureYouTubePlayer from '@/components/video/SecureYouTubePlayer';
+import { SecureYouTubePlayer } from '@/components/video/SecureYouTubePlayer';
 
 // Tipos de dados
 interface Lesson {

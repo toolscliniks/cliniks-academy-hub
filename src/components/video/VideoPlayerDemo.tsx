@@ -17,8 +17,8 @@ import {
   Video,
   Globe
 } from 'lucide-react';
-import SecureYouTubePlayer from './SecureYouTubePlayer';
-import UniversalSecurePlayer from './UniversalSecurePlayer';
+import { SecureYouTubePlayer } from './SecureYouTubePlayer';
+import { UniversalSecurePlayer } from './UniversalSecurePlayer';
 import { useToast } from '@/hooks/use-toast';
 
 interface DemoConfig {

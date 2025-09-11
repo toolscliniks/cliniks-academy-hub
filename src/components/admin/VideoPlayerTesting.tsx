@@ -23,8 +23,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 // import BasicProtectedPlayer from '@/components/BasicProtectedPlayer'; // Substituído pelo SecureYouTubePlayer
-import SecureYouTubePlayer from '@/components/video/SecureYouTubePlayer';
-import UniversalSecurePlayer from '@/components/video/UniversalSecurePlayer';
+import { SecureYouTubePlayer } from '@/components/video/SecureYouTubePlayer';
+import { UniversalSecurePlayer } from '@/components/video/UniversalSecurePlayer';
 import { useToast } from '@/hooks/use-toast';
 
 interface TestResult {
