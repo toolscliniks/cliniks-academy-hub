@@ -753,7 +753,7 @@ const DashboardSettings = () => {
                           <option value="top-left">Topo Esquerda</option>
                           <option value="top-center">Topo Centro</option>
                           <option value="top-right">Topo Direita</option>
-                          <option value="center-left">Centro Esquerda</option>
+                          <option value="bottom-center">Centro Inferior</option>
                           <option value="center-center">Centro</option>
                           <option value="center-right">Centro Direita</option>
                           <option value="bottom-left">Baixo Esquerda</option>

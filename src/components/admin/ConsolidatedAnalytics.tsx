@@ -229,13 +229,18 @@ const ConsolidatedAnalytics = () => {
 
       if (error) throw error;
       
-      if (data) {
-        const formattedData = data.map(item => ({
-          ...item,
-          description: item.activity_description || ''
-        }));
-        setRecentActivities(formattedData);
-      }
+        const { data, error } = await supabase
+          .from('user_activity_log')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100);
+
+        if (data) {
+          setRecentActivities(data.map(item => ({
+            ...item,
+            description: item.activity_description || ''
+          })));
+        }
     } catch (error: any) {
       console.error('Error fetching activities:', error);
     }

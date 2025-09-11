@@ -973,7 +973,7 @@ const LessonPage = () => {
             <div className="relative w-full mb-8">
               <SecureYouTubePlayer 
                 videoUrl={currentLesson.video_url || ''}
-                videoId={currentLesson.video_url ? getYouTubeVideoId(currentLesson.video_url) : ''}
+                videoId={currentLesson.video_url ? getYoutubeVideoId(currentLesson.video_url) : ''}
                 title={currentLesson.title}
                 onComplete={handleVideoComplete}
                 onProgress={(progress) => {

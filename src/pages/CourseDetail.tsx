@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PaymentService } from '@/utils/paymentService';
 import { 
   Play, 
   Clock, 
@@ -200,41 +201,48 @@ const CourseDetail = () => {
           description: "Você será redirecionado para a página de pagamento." 
         });
 
-        const { data, error } = await supabase.functions.invoke('create-payment', {
-          body: { 
-            courseId: courseId,
-            type: 'course',
-            billingType: paymentMethod
+        // Get user profile first
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        // Use the new PaymentService
+        const result = await PaymentService.purchaseCourse({
+          courseId: courseId,
+          userData: {
+            id: user.id,
+            name: profileData?.full_name || user.email?.split('@')[0] || '',
+            email: user.email || '',
+            cpf: profileData?.cpf_cnpj || '',
+            phone: profileData?.whatsapp || ''
           }
         });
 
-        if (error) {
-          console.error('Payment creation error:', error);
-          throw error;
-        }
-
-        console.log('Payment response:', data);
-
-        // Check if there are missing required fields
-        if (data && data.error === 'Dados obrigatórios não preenchidos') {
-          toast({
-            title: "Dados do Perfil Incompletos",
-            description: data.message,
-            variant: "destructive",
-            duration: 8000
-          });
+        if (!result.success) {
+          if (result.error?.includes('dados obrigatórios')) {
+            toast({
+              title: "Dados do Perfil Incompletos",
+              description: result.message,
+              variant: "destructive",
+              duration: 8000
+            });
+            
+            // Redirect to profile page
+            setTimeout(() => {
+              navigate('/profile');
+            }, 2000);
+            return;
+          }
           
-          // Redirect to profile page
-          setTimeout(() => {
-            navigate('/profile');
-          }, 2000);
-          return;
+          throw new Error(result.message);
         }
 
         // Show success message about payment email
         toast({
           title: "Solicitação de Compra Enviada!",
-          description: "Você receberá um email em breve com as instruções de pagamento. Verifique sua caixa de entrada e spam.",
+          description: result.message,
           duration: 8000
         });
         

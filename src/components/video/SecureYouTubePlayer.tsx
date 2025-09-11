@@ -675,7 +675,7 @@ const SecureYouTubePlayer: React.FC<SecureYouTubePlayerProps> = ({
           onContextMenu={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            e.stopImmediatePropagation();
+    e.stopPropagation();
             return false;
           }}
 
@@ -699,7 +699,7 @@ const SecureYouTubePlayer: React.FC<SecureYouTubePlayerProps> = ({
             ) {
               e.preventDefault();
               e.stopPropagation();
-              e.stopImmediatePropagation();
+      e.stopPropagation();
               return false;
             }
           }}
