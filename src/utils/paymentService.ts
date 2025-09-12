@@ -16,6 +16,20 @@ interface PaymentServiceOptions {
 
 export class PaymentService {
   /**
+   * Normaliza CPF removendo caracteres especiais
+   */
+  private static normalizeCPF(cpf: string): string {
+    return cpf.replace(/[^\d]/g, '');
+  }
+
+  /**
+   * Normaliza telefone removendo caracteres especiais
+   */
+  private static normalizePhone(phone: string): string {
+    return phone.replace(/[^\d]/g, '');
+  }
+
+  /**
    * Cria um payload unificado para envio ao n8n
    */
   private static createPayload(
@@ -23,16 +37,20 @@ export class PaymentService {
     options: PaymentServiceOptions,
     itemData: any
   ): UnifiedPayload {
+    // Normalizar dados do usuário
+    const normalizedCPF = this.normalizeCPF(options.userData.cpf);
+    const normalizedPhone = this.normalizePhone(options.userData.phone);
+
     return {
       type,
       request_id: uuidv4(),
       timestamp: new Date().toISOString(),
       user: {
         id: options.userData.id,
-        name: options.userData.name,
-        email: options.userData.email,
-        cpf: options.userData.cpf,
-        phone: options.userData.phone
+        name: options.userData.name.trim(),
+        email: options.userData.email.trim(),
+        cpf: normalizedCPF,
+        phone: normalizedPhone
       },
       item: {
         kind: type === 'course_purchase' ? 'course' : 'plan',
@@ -47,7 +65,6 @@ export class PaymentService {
       },
       meta: {
         source: 'web',
-        ip: window.location.hostname,
         user_agent: navigator.userAgent
       }
     };
@@ -229,22 +246,29 @@ export class PaymentService {
     isValid: boolean;
     missingFields: string[];
   } {
-    const requiredFields: Array<keyof PaymentServiceOptions['userData']> = [
-      'name', 'email', 'cpf', 'phone'
-    ];
-    
     const missingFields: string[] = [];
     
-    requiredFields.forEach(field => {
-      if (!userData[field]?.trim()) {
-        switch (field) {
-          case 'name': missingFields.push('nome completo'); break;
-          case 'email': missingFields.push('email'); break;
-          case 'cpf': missingFields.push('CPF'); break;
-          case 'phone': missingFields.push('telefone'); break;
-        }
-      }
-    });
+    // Validar nome
+    if (!userData.name?.trim()) {
+      missingFields.push('nome completo');
+    }
+    
+    // Validar email
+    if (!userData.email?.trim()) {
+      missingFields.push('email');
+    }
+    
+    // Validar CPF
+    const normalizedCPF = userData.cpf ? this.normalizeCPF(userData.cpf) : '';
+    if (!normalizedCPF || normalizedCPF.length !== 11) {
+      missingFields.push('CPF (deve ter 11 dígitos)');
+    }
+    
+    // Validar telefone
+    const normalizedPhone = userData.phone ? this.normalizePhone(userData.phone) : '';
+    if (!normalizedPhone || (normalizedPhone.length !== 10 && normalizedPhone.length !== 11)) {
+      missingFields.push('telefone (deve ter 10 ou 11 dígitos)');
+    }
     
     return {
       isValid: missingFields.length === 0,

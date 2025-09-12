@@ -9,8 +9,8 @@ export const UnifiedPayloadSchema = z.object({
     id: z.string().uuid(),
     name: z.string().min(1),
     email: z.string().email(),
-    cpf: z.string().min(11),
-    phone: z.string().min(10)
+    cpf: z.string().length(11, 'CPF deve ter exatamente 11 dígitos'),
+    phone: z.string().min(10).max(11, 'Telefone deve ter 10 ou 11 dígitos')
   }),
   item: z.object({
     kind: z.enum(['course', 'plan']),
@@ -27,7 +27,6 @@ export const UnifiedPayloadSchema = z.object({
   }),
   meta: z.object({
     source: z.literal('web'),
-    ip: z.string().optional(),
     user_agent: z.string().optional()
   })
 });
@@ -56,7 +55,6 @@ export const ExamplePayloads = {
     },
     meta: {
       source: 'web' as const,
-      ip: '192.168.1.1',
       user_agent: 'Mozilla/5.0...'
     }
   },
@@ -81,7 +79,6 @@ export const ExamplePayloads = {
     },
     meta: {
       source: 'web' as const,
-      ip: '192.168.1.1',
       user_agent: 'Mozilla/5.0...'
     }
   },
@@ -117,7 +114,6 @@ export const ExamplePayloads = {
     },
     meta: {
       source: 'web' as const,
-      ip: '192.168.1.1',
       user_agent: 'Mozilla/5.0...'
     }
   }

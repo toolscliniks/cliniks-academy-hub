@@ -52,6 +52,18 @@ const validatePayload = (payload: any): payload is UnifiedPayload => {
       return false;
     }
     
+    // Validar CPF (deve ter exatamente 11 dígitos)
+    const cpf = payload.user.cpf.replace(/[^\d]/g, '');
+    if (cpf.length !== 11) {
+      return false;
+    }
+    
+    // Validar telefone (deve ter 10 ou 11 dígitos)  
+    const phone = payload.user.phone.replace(/[^\d]/g, '');
+    if (phone.length < 10 || phone.length > 11) {
+      return false;
+    }
+    
     if (!payload.item?.kind || !['course', 'plan'].includes(payload.item?.kind)) {
       return false;
     }
