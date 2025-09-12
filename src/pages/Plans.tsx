@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Check, Star, CreditCard, Building, Banknote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { PaymentService } from '@/utils/paymentService';
 
 interface Plan {
   id: string;
@@ -61,35 +62,55 @@ const Plans = () => {
     setSubscribing(planId);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: { 
-          planId,
-          billingType: paymentMethod
+      console.log('Creating payment for plan:', planId);
+      
+      toast({ 
+        title: "Processando...", 
+        description: "Processando sua solicitação de assinatura." 
+      });
+
+      // Get user profile first
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      // Use the PaymentService for plans
+      const result = await PaymentService.purchasePlan({
+        planId: planId,
+        userData: {
+          id: user.id,
+          name: profileData?.full_name || user.email?.split('@')[0] || '',
+          email: user.email || '',
+          cpf: profileData?.cpf_cnpj || '',
+          phone: profileData?.whatsapp || ''
         }
       });
 
-      if (error) throw error;
-
-      // Check if there are missing required fields
-      if (data && data.error === 'Dados obrigatórios não preenchidos') {
-        toast({
-          title: "Dados do Perfil Incompletos",
-          description: data.message,
-          variant: "destructive",
-          duration: 8000
-        });
+      if (!result.success) {
+        if (result.error?.includes('dados obrigatórios')) {
+          toast({
+            title: "Dados do Perfil Incompletos",
+            description: result.message,
+            variant: "destructive",
+            duration: 8000
+          });
+          
+          // Redirect to profile page
+          setTimeout(() => {
+            navigate('/profile');
+          }, 2000);
+          return;
+        }
         
-        // Redirect to profile page
-        setTimeout(() => {
-          navigate('/profile');
-        }, 2000);
-        return;
+        throw new Error(result.message);
       }
 
       // Show success message about payment email
       toast({
         title: "Solicitação de Assinatura Enviada!",
-        description: "Você receberá um email em breve com as instruções de pagamento. Verifique sua caixa de entrada e spam.",
+        description: result.message,
         duration: 8000
       });
       
@@ -99,9 +120,10 @@ const Plans = () => {
       }, 2000);
 
     } catch (error: any) {
+      console.error('Error creating payment:', error);
       toast({
         title: "Erro no pagamento",
-        description: error.message,
+        description: error.message || "Erro ao processar pagamento",
         variant: "destructive"
       });
     } finally {
